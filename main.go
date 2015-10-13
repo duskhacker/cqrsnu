@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
 	"code.google.com/p/go-uuid/uuid"
+	"github.com/bitly/go-nsq"
 	"github.com/bitly/nsq/internal/app"
 )
 
@@ -10,9 +14,9 @@ import (
 //}
 
 const (
-	Topic                     = "Events"
-	channel                   = "Cafe"
 	maxConcurrentHttpRequests = 5
+	tabOpenedTopic            = "TabOpened"
+	openTabTopic              = "OpenTab"
 )
 
 type Tab struct {
@@ -21,46 +25,55 @@ type Tab struct {
 
 var (
 	lookupdHTTPAddrs = app.StringArray{}
-	Tabs             = []Tab{}
-	TabOpenedStore   = []TabOpened{}
+	nsqdTCPAddr      = "localhost:4150"
+
+	nsqConfig         = nsq.NewConfig()
+	tabOpenedProducer *nsq.Producer
+	openTabConsumer   *nsq.Consumer
 )
 
-//func HandleMessage(msg *nsq.Message) error {
-//	EventStore = append(O)
-//
-//}
+func OpenTabHandler(msg *nsq.Message) error {
+	ot := OpenTab{}.FromJson(msg.Body)
+	tabOpenedProducer.Publish("TabOpened", NewTabOpened(ot.Guid, ot.TableNumber, ot.WaitStaff).ToJson())
+	return nil
+}
 
-//func doSomething(msg interface{}) {
-//	fmt.Printf("%#v\n", msg)
-//}
+func initHandlers() {
+	tabOpenedProducer = newProducer(tabOpenedTopic, tabOpenedTopic+"Producer")
+	openTabConsumer = newConsumer(openTabTopic, openTabTopic+"Consumer", OpenTabHandler)
+}
 
-//func NsqSetup() {
-//	sigChan := make(chan os.Signal, 1)
-//	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-//
-//	cfg := nsq.NewConfig()
-//	cfg.UserAgent = channel
-//	cfg.MaxInFlight = maxConcurrentHttpRequests
-//
-//	consumer, err := nsq.NewConsumer(Topic, channel, cfg)
-//	if err != nil {
-//		log.Fatalf("[rir] %s", err)
-//	}
-//
-//	consumer.AddHandler(nsq.HandlerFunc(HandleMessage))
-//
-//	err = consumer.ConnectToNSQLookupds(lookupdHTTPAddrs)
-//	if err != nil {
-//		log.Fatalf("[rir] %s", err)
-//	}
-//
-//	for {
-//		select {
-//		case <-consumer.StopChan:
-//			return
-//		case <-sigChan:
-//			consumer.Stop()
-//		}
-//	}
-//
-//}
+func newConsumer(topic, channel string, handler func(*nsq.Message) error) *nsq.Consumer {
+	nsqConfig.UserAgent = channel
+
+	consumer, err := nsq.NewConsumer(topic, channel, nsqConfig)
+	if err != nil {
+		log.Fatalf("%s:%s; NewConsumer: %s", topic, channel, err)
+	}
+
+	consumer.AddHandler(nsq.HandlerFunc(nsq.HandlerFunc(handler)))
+
+	if err = consumer.ConnectToNSQLookupds(lookupdHTTPAddrs); err != nil {
+		log.Fatalf("%s:%s; ConnectToNSQLookupds: %s", topic, channel, err)
+	}
+	return consumer
+}
+
+func newProducer(channel, topic string) *nsq.Producer {
+	nsqConfig.UserAgent = fmt.Sprintf("%sProducer", topic)
+
+	producer, err := nsq.NewProducer(nsqdTCPAddr, nsqConfig)
+	if err != nil {
+		log.Fatalf("%s;%s failed to create nsq.Producer - %s", topic, channel, err)
+	}
+
+	if err = producer.Ping(); err != nil {
+		log.Fatalf("%s:%s; unable to ping nsqd: %s\n", topic, channel, err)
+	}
+
+	return producer
+}
+
+func main() {
+	nsqConfig.MaxInFlight = maxConcurrentHttpRequests
+}

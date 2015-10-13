@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-
 	"time"
 
 	"github.com/bitly/go-nsq"
@@ -14,62 +12,43 @@ import (
 var pf = fmt.Printf
 
 var _ = Describe("Main", func() {
-	var (
-		nsqdTCPAddr = "localhost:4150"
-		consumer    *nsq.Consumer
-		producer    *nsq.Producer
-		err         error
-		stuff       OpenTab
-	)
 
 	BeforeEach(func() {
 		lookupdHTTPAddrs.Set("mnementh.dev:4161")
-		cfg := nsq.NewConfig()
-		cfg.UserAgent = channel
-		cfg.MaxInFlight = maxConcurrentHttpRequests
-		cfg.LookupdPollInterval = time.Millisecond * 250
+		nsqConfig.MaxInFlight = maxConcurrentHttpRequests
+		nsqConfig.LookupdPollInterval = time.Millisecond * 100
 
-		if consumer, err = nsq.NewConsumer("Tab", "TabConsumer", cfg); err != nil {
-			log.Fatalf("NewConsumer: %s", err)
-		}
-
-		consumer.AddHandler(nsq.HandlerFunc(func(msg *nsq.Message) error {
-			stuff = OpenTab{}.FromJson(msg.Body)
-			return nil
-		}))
-
-		if err = consumer.ConnectToNSQLookupds(lookupdHTTPAddrs); err != nil {
-			log.Fatalf("ConnectToNSQLookupds: %s", err)
-		}
-
-		cfg.UserAgent = fmt.Sprintf("%s_producer", "Tab")
-		if producer, err = nsq.NewProducer(nsqdTCPAddr, cfg); err != nil {
-			log.Fatalf("failed to create nsq.Producer - %s", err)
-		}
-
-		if err = producer.Ping(); err != nil {
-			log.Fatalf("unable to ping nsqd: %s\n", err)
-		}
+		initHandlers()
 
 	})
 
 	Describe("Tab", func() {
+		var (
+			producer *nsq.Producer
+			received = false
+		)
+
+		BeforeEach(func() {
+			producer = newProducer(openTabTopic, openTabTopic+"Producer")
+		})
+
 		FIt("receives a TabOpened Event", func() {
 			command := NewOpenTab(1, "Veronica")
 			expected := NewTabOpened(command.Guid, 1, "Veronica")
 
-			f := func() bool {
-				for _, tab := range TabOpenedStore {
-					if tab.Guid.String() == expected.Guid.String() {
-						return true
-					}
+			f := func(m *nsq.Message) error {
+				to := TabOpened{}.FromJson(m.Body)
+				if to.Guid.String() == expected.Guid.String() {
+					received = true
 				}
-				return false
+				return nil
 			}
 
-			producer.Publish(Topic, command.ToJson())
+			_ = newConsumer(tabOpenedTopic, tabOpenedTopic+"TestConsumer", f)
 
-			Eventually(f).Should(BeTrue(), "No TabOpened Event generated")
+			producer.Publish(openTabTopic, command.ToJson())
+
+			Eventually(func() bool { return received }).Should(BeTrue(), "No TabOpened Event generated")
 		})
 	})
 })
