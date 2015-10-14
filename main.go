@@ -17,7 +17,7 @@ var (
 	nsqdTCPAddr      = "localhost:4150"
 
 	nsqConfig = nsq.NewConfig()
-	Tabs      = make(map[string]Tab)
+	Tabs      = make(map[string]*Tab)
 )
 
 func Serialize(object interface{}) []byte {

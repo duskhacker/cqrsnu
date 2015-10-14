@@ -8,12 +8,14 @@ import (
 )
 
 var (
-	openTabProducer       *nsq.Producer
-	tabOpenedProducer     *nsq.Producer
-	placeOrderProducer    *nsq.Producer
-	foodOrderedProducer   *nsq.Producer
-	drinksOrderedProducer *nsq.Producer
-	exceptionProducer     *nsq.Producer
+	openTabProducer          *nsq.Producer
+	tabOpenedProducer        *nsq.Producer
+	placeOrderProducer       *nsq.Producer
+	foodOrderedProducer      *nsq.Producer
+	drinksOrderedProducer    *nsq.Producer
+	drinksServedProducer     *nsq.Producer
+	markDrinksServedProducer *nsq.Producer
+	exceptionProducer        *nsq.Producer
 )
 
 func newProducer(channel, topic string) *nsq.Producer {
@@ -68,6 +70,20 @@ func Send(topic string, message interface{}) {
 		}
 		if err := drinksOrderedProducer.Publish(drinksOrdered, Serialize(message)); err != nil {
 			log.Fatalf("Send %s error: %s\n", drinksOrdered, err)
+		}
+	case drinksServed:
+		if drinksServedProducer == nil {
+			drinksServedProducer = newProducer(drinksServed, drinksServed+"Producer")
+		}
+		if err := drinksServedProducer.Publish(drinksServed, Serialize(message)); err != nil {
+			log.Fatalf("Send %s error: %s\n", drinksServed, err)
+		}
+	case markDrinksServed:
+		if markDrinksServedProducer == nil {
+			markDrinksServedProducer = newProducer(markDrinksServed, markDrinksServed+"Producer")
+		}
+		if err := markDrinksServedProducer.Publish(markDrinksServed, Serialize(message)); err != nil {
+			log.Fatalf("Send %s error: %s\n", markDrinksServed, err)
 		}
 	case exception:
 		if exceptionProducer == nil {

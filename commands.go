@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	openTab    = "OpenTab"
-	placeOrder = "PlaceOrder"
+	openTab          = "OpenTab"
+	placeOrder       = "PlaceOrder"
+	markDrinksServed = "MarkDrinksServed"
 )
 
 type OpenTab struct {
@@ -55,5 +56,34 @@ func NewPlaceOrder(id uuid.UUID, items []OrderedItem) PlaceOrder {
 	return PlaceOrder{
 		ID:    id,
 		Items: items,
+	}
+}
+
+// --
+
+//public class MarkDrinksServed
+//{
+//public Guid Id;
+//public List<int> MenuNumbers;
+//}
+
+type MarkDrinksServed struct {
+	ID          uuid.UUID
+	MenuNumbers []int
+}
+
+func (mds MarkDrinksServed) FromJson(data []byte) MarkDrinksServed {
+	var err error
+	err = json.Unmarshal(data, &mds)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return mds
+}
+
+func NewMarkDrinksServed(id uuid.UUID, items []int) MarkDrinksServed {
+	return MarkDrinksServed{
+		ID:          id,
+		MenuNumbers: items,
 	}
 }

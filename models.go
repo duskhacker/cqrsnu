@@ -3,11 +3,27 @@ package main
 import "code.google.com/p/go-uuid/uuid"
 
 type Tab struct {
-	ID          uuid.UUID
-	TableNumber int
-	WaitStaff   string
-	Items       []OrderedItem
+	ID                uuid.UUID
+	TableNumber       int
+	WaitStaff         string
+	OutstandingDrinks []OrderedItem
+	OutstandingFood   []OrderedItem
+	Open              bool
+	ServedItemsValue  float64
 }
+
+func (t Tab) AreDrinksOutstanding(drinks []int) bool {
+	for _, drink := range drinks {
+		for _, outstanding := range t.OutstandingDrinks {
+			if drink == outstanding.MenuNumber {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// -
 
 type OrderedItem struct {
 	MenuNumber  int
@@ -15,15 +31,6 @@ type OrderedItem struct {
 	IsDrink     bool
 	Price       float64
 }
-
-//func (oi OrderedItem) FromJson(data []byte) OrderedItem {
-//	var err error
-//	err = json.Unmarshal(data, &oi)
-//	if err != nil {
-//		log.Fatalf("json.Unmarshal: %s\n'", err)
-//	}
-//	return oi
-//}
 
 func NewOrderedItem(menuNumber int, description string, isDrink bool, price float64) OrderedItem {
 	return OrderedItem{

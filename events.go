@@ -11,6 +11,7 @@ const (
 	tabOpened     = "TabOpened"
 	foodOrdered   = "FoodOrdered"
 	drinksOrdered = "DrinksOrdered"
+	drinksServed  = "DrinksServed"
 	exception     = "Exception"
 )
 
@@ -85,25 +86,25 @@ func NewFoodOrdered(id uuid.UUID, items []OrderedItem) FoodOrdered {
 
 // --
 
-type CommandException struct {
-	Guid    uuid.UUID
-	Type    string
-	Message string
+type DrinksServed struct {
+	ID          uuid.UUID
+	MenuNumbers []int
 }
 
-func (c CommandException) FromJson(data []byte) CommandException {
+func (ds DrinksServed) FromJson(data []byte) DrinksServed {
 	var err error
-	err = json.Unmarshal(data, &c)
+	err = json.Unmarshal(data, &ds)
 	if err != nil {
 		log.Fatalf("json.Unmarshal: %s\n'", err)
 	}
-	return c
+	return ds
 }
 
-func NewCommandException(guid uuid.UUID, t string, msg string) CommandException {
-	return CommandException{Guid: guid, Type: t, Message: msg}
+func NewDrinksServed(id uuid.UUID, items []int) DrinksServed {
+	return DrinksServed{
+		ID:          id,
+		MenuNumbers: items,
+	}
 }
 
-func (c CommandException) Error() string {
-	return c.Type + ":" + c.Message + "(" + c.Guid.String() + ")"
-}
+// --

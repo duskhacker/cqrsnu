@@ -18,7 +18,7 @@ var _ = Describe("Main", func() {
 	BeforeEach(func() {
 		lookupdHTTPAddrs.Set("mnementh.dev:4161")
 		nsqConfig.MaxInFlight = maxConcurrentHttpRequests
-		nsqConfig.LookupdPollInterval = time.Millisecond * 100
+		nsqConfig.LookupdPollInterval = time.Millisecond * 10
 
 		initConsumers()
 	})
@@ -50,12 +50,11 @@ var _ = Describe("Main", func() {
 			done := make(chan bool)
 			It("receives error", func() {
 				command := NewPlaceOrder(nil, nil)
-				expected := NewCommandException(nil, "TabNotOpen", "Cannot Place order without open Tab")
 
 				f := func(m *nsq.Message) error {
 					ex := new(CommandException).FromJson(m.Body)
 					defer GinkgoRecover()
-					Expect(ex).To(Equal(expected))
+					Expect(ex).To(Equal(tabNotOpenException))
 					done <- true
 					return nil
 				}
@@ -149,5 +148,90 @@ var _ = Describe("Main", func() {
 				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "No DrinksOrdered event generated")
 			})
 		})
+	})
+
+	Describe("MarkDrinksServed", func() {
+		var (
+			id uuid.UUID
+
+			drinks []OrderedItem
+		)
+
+		BeforeEach(func() {
+			drinks = append(drinks, NewOrderedItem(1, "Patron", true, 5.00))
+			drinks = append(drinks, NewOrderedItem(2, "Scotch", true, 7.00))
+
+			command := NewOpenTab(1, "Veronica")
+			id = command.ID
+
+			Send(openTab, command)
+			//			waitFor(tabOpened)
+		})
+
+		Describe("with 1 drink ordered", func() {
+			BeforeEach(func() {
+				Send(placeOrder, NewPlaceOrder(id, []OrderedItem{drinks[0]}))
+			})
+
+			It("generates exception if second drink is marked served", func() {
+				done := make(chan bool)
+
+				f := func(m *nsq.Message) error {
+					ex := new(CommandException).FromJson(m.Body)
+					defer GinkgoRecover()
+					Expect(ex).To(Equal(drinksNotOutstanding))
+					done <- true
+					return nil
+				}
+				c := newConsumer(exception, exception+"TestConsumer", f)
+
+				Send(markDrinksServed, NewMarkDrinksServed(id, []int{drinks[1].MenuNumber}))
+
+				Eventually(done).Should(Receive(BeTrue()), "drinksNotOutstanding Exception not Raised")
+				c.Stop()
+			})
+		})
+
+		Describe("with drinks ordered", func() {
+
+			BeforeEach(func() {
+				Send(placeOrder, NewPlaceOrder(id, drinks))
+			})
+
+			It("marks drinks served", func() {
+				drinksServedDone := make(chan bool)
+
+				menuNumbers := []int{}
+				for _, drink := range drinks {
+					menuNumbers = append(menuNumbers, drink.MenuNumber)
+				}
+
+				dsf := func(m *nsq.Message) error {
+					defer GinkgoRecover()
+					evt := new(DrinksServed).FromJson(m.Body)
+					Expect(evt.MenuNumbers).To(Equal(menuNumbers))
+					drinksServedDone <- true
+					return nil
+				}
+
+				c1 := newConsumer(drinksServed, drinksServed+"TestConsumer", dsf)
+
+				done := make(chan bool)
+				f := func(m *nsq.Message) error {
+					ex := new(CommandException).FromJson(m.Body)
+					pf("Got Exception: %#v\n", ex)
+					done <- true
+					return nil
+				}
+				c2 := newConsumer(exception, exception+"TestConsumer", f)
+
+				Send(markDrinksServed, NewMarkDrinksServed(id, menuNumbers))
+
+				Eventually(drinksServedDone).Should(Receive(BeTrue()), "No DrinksServed event generated")
+				c1.Stop()
+				c2.Stop()
+			})
+		})
+
 	})
 })

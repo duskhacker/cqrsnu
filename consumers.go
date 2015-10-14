@@ -7,14 +7,16 @@ import (
 )
 
 var (
-	openTabConsumer    *nsq.Consumer
-	tapOpenedConsumer  *nsq.Consumer
-	placeOrderConsumer *nsq.Consumer
+	openTabConsumer          *nsq.Consumer
+	tapOpenedConsumer        *nsq.Consumer
+	placeOrderConsumer       *nsq.Consumer
+	markDrinksServedConsumer *nsq.Consumer
 )
 
 func initConsumers() {
 	openTabConsumer = newConsumer(openTab, openTab+"Consumer", OpenTabHandler)
 	placeOrderConsumer = newConsumer(placeOrder, placeOrder+"Consumer", PlaceOrderHandler)
+	markDrinksServedConsumer = newConsumer(markDrinksServed, markDrinksServed+"Consumer", MarkDrinksServedHandler)
 }
 
 func newConsumer(topic, channel string, handler func(*nsq.Message) error) *nsq.Consumer {
