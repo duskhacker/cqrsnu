@@ -24,91 +24,86 @@ var _ = Describe("Main", func() {
 	})
 
 	Describe("Tab", func() {
-		var (
-			received = false
-		)
-
-		It("receives a TabOpened Event", func() {
+		It("opens a tab", func() {
+			done := make(chan bool)
 			command := NewOpenTab(1, "Veronica")
 			expected := NewTabOpened(command.ID, 1, "Veronica")
 
 			f := func(m *nsq.Message) error {
-				to := new(TabOpened).FromJson(m.Body)
-				if to.ID.String() == expected.ID.String() {
-					received = true
-				}
+				defer GinkgoRecover()
+				Expect(new(TabOpened).FromJson(m.Body)).To(Equal(expected))
+				done <- true
 				return nil
 			}
 
-			_ = newConsumer(tabOpened, tabOpened+"TestConsumer", f)
+			c := newConsumer(tabOpened, tabOpened+"TestConsumer", f)
 
 			Send(openTab, command)
 
-			Eventually(func() bool { return received }).Should(BeTrue(), "No TabOpened Event generated")
+			Eventually(done).Should(Receive(BeTrue()), "No TabOpened Event generated")
+			c.Stop()
 		})
 	})
 
 	Describe("PlaceOrder", func() {
-		var (
-			received bool
-			id       uuid.UUID
-		)
-
 		Describe("with no tab opened", func() {
-			It("receives error if no tab opened", func() {
-				command := NewPlaceOrder(uuid.NewRandom(), nil)
+			done := make(chan bool)
+			It("receives error", func() {
+				command := NewPlaceOrder(nil, nil)
+				expected := NewCommandException(nil, "TabNotOpen", "Cannot Place order without open Tab")
 
 				f := func(m *nsq.Message) error {
 					ex := new(CommandException).FromJson(m.Body)
-					if ex.Type == "TabNotOpen" && ex.Message == "Cannot Place order without open Tab" {
-						received = true
-					}
+					defer GinkgoRecover()
+					Expect(ex).To(Equal(expected))
+					done <- true
 					return nil
 				}
 
-				_ = newConsumer(exception, exception+"TestConsumer", f)
+				c := newConsumer(exception, exception+"TestConsumer", f)
 
 				Send(placeOrder, command)
 
-				Eventually(func() bool { return received }).Should(BeTrue(), "PlaceOrder Exception not Raised")
+				Eventually(done).Should(Receive(BeTrue()), "PlaceOrder Exception not Raised")
+				c.Stop()
 			})
 		})
 
 		Describe("with tab opened", func() {
 			var (
-				foodOrderedReceived   bool
-				drinksOrderedReceived bool
+				c1, c2, c3 *nsq.Consumer
+				id         uuid.UUID
+
+				foodOrderedDone   = make(chan bool)
+				drinksOrderedDone = make(chan bool)
 
 				drink OrderedItem
 				food  OrderedItem
 			)
 
 			BeforeEach(func() {
-				foodOrderedReceived = false
-				drinksOrderedReceived = false
-
 				drink = NewOrderedItem(1, "Patron", true, 5.00)
 				food = NewOrderedItem(1, "Steak", false, 15.00)
 
 				dof := func(m *nsq.Message) error {
 					order := new(DrinksOrdered).FromJson(m.Body)
 					if len(order.Items) > 0 {
-						drinksOrderedReceived = true
+						drinksOrderedDone <- true
 					}
 					return nil
 				}
 
-				_ = newConsumer(drinksOrdered, drinksOrdered+"TestConsumer", dof)
+				c1 = newConsumer(drinksOrdered, drinksOrdered+"TestConsumer", dof)
 
 				fof := func(m *nsq.Message) error {
 					order := new(FoodOrdered).FromJson(m.Body)
 					if len(order.Items) > 0 {
-						foodOrderedReceived = true
+						foodOrderedDone <- true
 					}
 					return nil
 				}
 
-				_ = newConsumer(foodOrdered, foodOrdered+"TestConsumer", fof)
+				c2 = newConsumer(foodOrdered, foodOrdered+"TestConsumer", fof)
 
 				exf := func(m *nsq.Message) error {
 					defer GinkgoRecover()
@@ -117,7 +112,7 @@ var _ = Describe("Main", func() {
 					return nil
 				}
 
-				_ = newConsumer(exception, exception+"TestConsumer", exf)
+				c3 = newConsumer(exception, exception+"TestConsumer", exf)
 
 				command := NewOpenTab(1, "Veronica")
 				id = command.ID
@@ -125,12 +120,16 @@ var _ = Describe("Main", func() {
 				Send(openTab, command)
 			})
 
+			AfterEach(func() {
+				c1.Stop()
+				c2.Stop()
+				c3.Stop()
+			})
+
 			It("orders drinks", func() {
-				command := NewPlaceOrder(id, []OrderedItem{drink})
+				Send(placeOrder, NewPlaceOrder(id, []OrderedItem{drink}))
 
-				Send(placeOrder, command)
-
-				Eventually(func() bool { return drinksOrderedReceived }).Should(BeTrue(), "No DrinksOrdered event generated")
+				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "No DrinksOrdered event generated")
 			})
 
 			It("orders food", func() {
@@ -138,7 +137,7 @@ var _ = Describe("Main", func() {
 
 				Send(placeOrder, command)
 
-				Eventually(func() bool { return foodOrderedReceived }).Should(BeTrue(), "No FoodOrdered event generated")
+				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "No FoodOrdered event generated")
 			})
 
 			It("orders food and drink", func() {
@@ -146,8 +145,8 @@ var _ = Describe("Main", func() {
 
 				Send(placeOrder, command)
 
-				Eventually(func() bool { return foodOrderedReceived }).Should(BeTrue(), "No FoodOrdered event generated")
-				Eventually(func() bool { return drinksOrderedReceived }).Should(BeTrue(), "No DrinksOrdered event generated")
+				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "No FoodOrdered event generated")
+				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "No DrinksOrdered event generated")
 			})
 		})
 	})

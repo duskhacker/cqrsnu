@@ -1,9 +1,6 @@
 package main
 
-import (
-	"code.google.com/p/go-uuid/uuid"
-	"github.com/bitly/go-nsq"
-)
+import "github.com/bitly/go-nsq"
 
 func OpenTabHandler(msg *nsq.Message) error {
 	ot := OpenTab{}.FromJson(msg.Body)
@@ -16,7 +13,7 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 	order := new(PlaceOrder).FromJson(msg.Body)
 	tab, ok := Tabs[order.ID.String()]
 	if !ok {
-		Send(exception, NewCommandException(uuid.NewRandom(), "TabNotOpen", "Cannot Place order without open Tab"))
+		Send(exception, NewCommandException(nil, "TabNotOpen", "Cannot Place order without open Tab"))
 		return nil
 	}
 

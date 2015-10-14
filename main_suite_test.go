@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"os"
 	"os/exec"
 	"testing"
 
@@ -21,12 +23,31 @@ func TestMainSuite(t *testing.T) {
 	RunSpecs(t, suite+" Suite")
 }
 
+func RemoveDataFiles() {
+	dirName := os.ExpandEnv("${GOPATH}/src/github.com/duskhacker/cqrsnu/data")
+	dir, err := os.Open(dirName)
+	if err != nil {
+		log.Fatalf("error opening %s: %s", dirName, err)
+	}
+
+	files, err := dir.Readdir(0)
+	if err != nil {
+		log.Fatalf("error reading dir %s: %s\n", dir.Name(), err)
+	}
+
+	for _, file := range files {
+		os.Remove(dir.Name() + "/" + file.Name())
+	}
+}
+
 var _ = BeforeSuite(func() {
 	var err error
+
+	RemoveDataFiles()
+
 	command := exec.Command("forego", "start")
 	serverSession, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ToNot(HaveOccurred())
-	//		Eventually(serverSession.Out, "10s").Should(gbytes.Say(`LOOKUPD\(mnementh.dev:4160\): peer info \{TcpPort:4160 HttpPort:4161 Version:0.3.2 BroadcastAddress:Mnementh.local\}`))
 	Eventually(serverSession, "10s").Should(gbytes.Say(`peer info`))
 })
 
