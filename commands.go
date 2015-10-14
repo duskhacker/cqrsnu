@@ -7,12 +7,10 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
-//public class OpenTab
-//{
-//public Guid Id;
-//public int TableNumber;
-//public string Waiter;
-//}
+const (
+	openTab    = "OpenTab"
+	placeOrder = "PlaceOrder"
+)
 
 type OpenTab struct {
 	ID          uuid.UUID
@@ -37,11 +35,7 @@ func (o OpenTab) FromJson(data []byte) OpenTab {
 	return o
 }
 
-//public class PlaceOrder
-//{
-//public Guid Id;
-//public List<OrderedItem> Items;
-//}
+// --
 
 type PlaceOrder struct {
 	ID    uuid.UUID
