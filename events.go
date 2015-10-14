@@ -7,25 +7,10 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
-//public class TabOpened
-//{
-//public Guid Id;
-//public int TableNumber;
-//public string Waiter;
-//}
-
 type TabOpened struct {
-	Guid        uuid.UUID
+	ID          uuid.UUID
 	TableNumber int
 	WaitStaff   string
-}
-
-func (t TabOpened) ToJson() []byte {
-	j, err := json.Marshal(t)
-	if err != nil {
-		log.Fatalf("json.Marshal: %s", err)
-	}
-	return j
 }
 
 func (t TabOpened) FromJson(data []byte) TabOpened {
@@ -39,8 +24,54 @@ func (t TabOpened) FromJson(data []byte) TabOpened {
 
 func NewTabOpened(guid uuid.UUID, tableNumber int, waitStaff string) TabOpened {
 	return TabOpened{
-		Guid:        guid,
+		ID:          guid,
 		TableNumber: tableNumber,
 		WaitStaff:   waitStaff,
+	}
+}
+
+// --
+
+type DrinksOrdered struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (do DrinksOrdered) FromJson(data []byte) DrinksOrdered {
+	var err error
+	err = json.Unmarshal(data, &do)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return do
+}
+
+func NewDrinksOrdered(id uuid.UUID, items []OrderedItem) DrinksOrdered {
+	return DrinksOrdered{
+		ID:    id,
+		Items: items,
+	}
+}
+
+// --
+
+type FoodOrdered struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (fo FoodOrdered) FromJson(data []byte) FoodOrdered {
+	var err error
+	err = json.Unmarshal(data, &fo)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return fo
+}
+
+func NewFoodOrdered(id uuid.UUID, items []OrderedItem) FoodOrdered {
+	return FoodOrdered{
+		ID:    id,
+		Items: items,
 	}
 }

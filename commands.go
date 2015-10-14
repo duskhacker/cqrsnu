@@ -15,25 +15,17 @@ import (
 //}
 
 type OpenTab struct {
-	Guid        uuid.UUID
+	ID          uuid.UUID
 	TableNumber int
 	WaitStaff   string
 }
 
 func NewOpenTab(tableNumber int, waiter string) OpenTab {
 	return OpenTab{
-		Guid:        uuid.NewRandom(),
+		ID:          uuid.NewRandom(),
 		TableNumber: tableNumber,
 		WaitStaff:   waiter,
 	}
-}
-
-func (o OpenTab) ToJson() []byte {
-	j, err := json.Marshal(o)
-	if err != nil {
-		log.Fatalf("json.Marshal: %s", err)
-	}
-	return j
 }
 
 func (o OpenTab) FromJson(data []byte) OpenTab {
@@ -45,8 +37,29 @@ func (o OpenTab) FromJson(data []byte) OpenTab {
 	return o
 }
 
-//func (o OpenTab) FromJson(json []byte) OpenTab {
-//	var err error
-//	err = json.Unmarshal(json, &o)
-//
+//public class PlaceOrder
+//{
+//public Guid Id;
+//public List<OrderedItem> Items;
 //}
+
+type PlaceOrder struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (po PlaceOrder) FromJson(data []byte) PlaceOrder {
+	var err error
+	err = json.Unmarshal(data, &po)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return po
+}
+
+func NewPlaceOrder(id uuid.UUID, items []OrderedItem) PlaceOrder {
+	return PlaceOrder{
+		ID:    id,
+		Items: items,
+	}
+}

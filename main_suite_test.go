@@ -26,8 +26,8 @@ var _ = BeforeSuite(func() {
 	command := exec.Command("forego", "start")
 	serverSession, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ToNot(HaveOccurred())
-	//	Eventually(serverSession.Out, "10s").Should(gbytes.Say(`LOOKUPD\(mnementh.dev:4160\): peer info \{TcpPort:4160 HttpPort:4161 Version:0.3.2 BroadcastAddress:Mnementh.local\}`))
-	Eventually(serverSession.Out, "10s").Should(gbytes.Say(`peer info`))
+	//		Eventually(serverSession.Out, "10s").Should(gbytes.Say(`LOOKUPD\(mnementh.dev:4160\): peer info \{TcpPort:4160 HttpPort:4161 Version:0.3.2 BroadcastAddress:Mnementh.local\}`))
+	Eventually(serverSession, "10s").Should(gbytes.Say(`peer info`))
 })
 
 var _ = AfterSuite(func() {
