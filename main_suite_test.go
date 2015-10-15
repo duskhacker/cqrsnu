@@ -44,11 +44,12 @@ var _ = BeforeSuite(func() {
 	var err error
 
 	RemoveDataFiles()
+	dataPath := os.ExpandEnv("${GOPATH}/src/github.com/duskhacker/cqrsnu/data")
 
-	command := exec.Command("forego", "start")
+	command := exec.Command("nsqd", "--data-path="+dataPath, "--tcp-address=localhost:4150", "--http-address=localhost:4151", "--broadcast-address=localhost")
 	serverSession, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ToNot(HaveOccurred())
-	Eventually(serverSession, "10s").Should(gbytes.Say(`peer info`))
+	Eventually(serverSession.Err, "2s").Should(gbytes.Say(`TCP: listening on`))
 })
 
 var _ = AfterSuite(func() {

@@ -15,6 +15,7 @@ const (
 var (
 	lookupdHTTPAddrs = app.StringArray{}
 	nsqdTCPAddr      = "localhost:4150"
+	connectToNSQD    bool
 
 	nsqConfig = nsq.NewConfig()
 	Tabs      = make(map[string]*Tab)

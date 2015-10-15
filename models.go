@@ -1,6 +1,11 @@
 package main
 
-import "code.google.com/p/go-uuid/uuid"
+import (
+	"fmt"
+	"log"
+
+	"code.google.com/p/go-uuid/uuid"
+)
 
 type Tab struct {
 	ID                uuid.UUID
@@ -12,6 +17,18 @@ type Tab struct {
 	ServedItemsValue  float64
 }
 
+func NewTab(id uuid.UUID, tn int, ws string, od []OrderedItem, of []OrderedItem, open bool, siv float64) *Tab {
+	return &Tab{
+		ID:                id,
+		TableNumber:       tn,
+		WaitStaff:         ws,
+		OutstandingDrinks: od,
+		OutstandingFood:   of,
+		Open:              open,
+		ServedItemsValue:  siv,
+	}
+}
+
 func (t Tab) AreDrinksOutstanding(drinks []int) bool {
 	for _, drink := range drinks {
 		for _, outstanding := range t.OutstandingDrinks {
@@ -21,6 +38,39 @@ func (t Tab) AreDrinksOutstanding(drinks []int) bool {
 		}
 	}
 	return false
+}
+
+func indexOfOrderedItem(items []OrderedItem, menuNumber int) int {
+	for i, e := range items {
+		if e.MenuNumber == menuNumber {
+			return i
+		}
+	}
+	return -1
+}
+
+func (t *Tab) DeleteOutstandingDrinks(items []int) error {
+	for _, item := range items {
+		drinks, err := deleteOrderedItem(t.OutstandingDrinks, item)
+		if err != nil {
+			return err
+		}
+		t.OutstandingDrinks = drinks
+	}
+	return nil
+}
+
+func deleteOrderedItem(items []OrderedItem, item int) ([]OrderedItem, error) {
+	idx := indexOfOrderedItem(items, item)
+	if idx < 0 {
+		return nil, fmt.Errorf("no item %#v in tab", item)
+	}
+	a := make([]OrderedItem, len(items))
+	n := copy(a, items)
+	if n <= 0 {
+		log.Fatalf("error copying data for deleteOutstandingDrinks")
+	}
+	return append(a[:idx], a[idx+1:]...), nil
 }
 
 // -

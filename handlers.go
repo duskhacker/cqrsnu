@@ -59,3 +59,16 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 	Send(drinksServed, NewDrinksServed(c.ID, c.MenuNumbers))
 	return nil
 }
+
+func DrinksServedHandler(msg *nsq.Message) error {
+	c := new(DrinksServed).FromJson(msg.Body)
+	tab, ok := Tabs[c.ID.String()]
+	if !ok {
+		Send(exception, tabNotOpenException)
+		return nil
+	}
+
+	tab.DeleteOutstandingDrinks(c.MenuNumbers)
+
+	return nil
+}
