@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"sync"
 
 	"github.com/bitly/go-nsq"
 	"github.com/bitly/nsq/internal/app"
@@ -18,7 +19,7 @@ var (
 	connectToNSQD    bool
 
 	nsqConfig = nsq.NewConfig()
-	Tabs      = make(map[string]*Tab)
+	mutex     sync.RWMutex
 )
 
 func Serialize(object interface{}) []byte {

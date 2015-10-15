@@ -7,6 +7,10 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
+var (
+	Tabs = make(map[string]*Tab)
+)
+
 type Tab struct {
 	ID                uuid.UUID
 	TableNumber       int
@@ -18,7 +22,9 @@ type Tab struct {
 }
 
 func NewTab(id uuid.UUID, tn int, ws string, od []OrderedItem, of []OrderedItem, open bool, siv float64) *Tab {
-	return &Tab{
+	mutex.Lock()
+	defer mutex.Unlock()
+	tab := &Tab{
 		ID:                id,
 		TableNumber:       tn,
 		WaitStaff:         ws,
@@ -27,6 +33,16 @@ func NewTab(id uuid.UUID, tn int, ws string, od []OrderedItem, of []OrderedItem,
 		Open:              open,
 		ServedItemsValue:  siv,
 	}
+	Tabs[id.String()] = tab
+	return tab
+}
+
+func GetTab(id uuid.UUID) *Tab {
+	tab, ok := Tabs[id.String()]
+	if !ok {
+		return nil
+	}
+	return tab
 }
 
 func (t Tab) AreDrinksOutstanding(drinks []int) bool {

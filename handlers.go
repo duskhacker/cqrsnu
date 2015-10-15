@@ -3,16 +3,20 @@ package main
 import "github.com/bitly/go-nsq"
 
 func OpenTabHandler(msg *nsq.Message) error {
-	ot := OpenTab{}.FromJson(msg.Body)
-	Tabs[ot.ID.String()] = &Tab{ID: ot.ID, TableNumber: ot.TableNumber, WaitStaff: ot.WaitStaff}
+	ot := new(OpenTab).FromJson(msg.Body)
+	NewTab(ot.ID, ot.TableNumber, ot.WaitStaff, nil, nil, true, 0)
 	Send(tabOpened, NewTabOpened(ot.ID, ot.TableNumber, ot.WaitStaff))
 	return nil
 }
 
 func PlaceOrderHandler(msg *nsq.Message) error {
 	order := new(PlaceOrder).FromJson(msg.Body)
-	tab, ok := Tabs[order.ID.String()]
-	if !ok {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(order.ID)
+	if tab == nil {
 		Send(exception, tabNotOpenException)
 		return nil
 	}
@@ -45,8 +49,12 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 
 func MarkDrinksServedHandler(msg *nsq.Message) error {
 	c := new(MarkDrinksServed).FromJson(msg.Body)
-	tab, ok := Tabs[c.ID.String()]
-	if !ok {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(c.ID)
+	if tab == nil {
 		Send(exception, tabNotOpenException)
 		return nil
 	}
@@ -62,8 +70,13 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 
 func DrinksServedHandler(msg *nsq.Message) error {
 	c := new(DrinksServed).FromJson(msg.Body)
-	tab, ok := Tabs[c.ID.String()]
-	if !ok {
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(c.ID)
+
+	if tab == nil {
 		Send(exception, tabNotOpenException)
 		return nil
 	}
