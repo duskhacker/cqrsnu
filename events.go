@@ -12,6 +12,7 @@ const (
 	foodOrdered   = "FoodOrdered"
 	drinksOrdered = "DrinksOrdered"
 	drinksServed  = "DrinksServed"
+	foodPrepared  = "FoodPrepared"
 	tabClosed     = "TabClosed"
 	exception     = "Exception"
 )
@@ -110,6 +111,29 @@ func NewDrinksServed(id uuid.UUID, items []OrderedItem) DrinksServed {
 
 // --
 
+type FoodPrepared struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (fp FoodPrepared) FromJSON(data []byte) FoodPrepared {
+	var err error
+	err = json.Unmarshal(data, &fp)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return fp
+}
+
+func NewFoodPrepared(id uuid.UUID, items []OrderedItem) FoodPrepared {
+	return FoodPrepared{
+		ID:    id,
+		Items: items,
+	}
+}
+
+// --
+
 type TabClosed struct {
 	ID         uuid.UUID
 	AmountPaid float64
@@ -161,3 +185,4 @@ func (c Exception) Error() string {
 
 var TabNotOpenException = NewException("TabNotOpen", "Cannot Place order without open Tab")
 var DrinksNotOutstanding = NewException("DrinksNotOutstanding", "Cannot serve unordered drinks")
+var FoodsNotOutstanding = NewException("FoodsNotOutstanding", "Cannot prepare unordered food")

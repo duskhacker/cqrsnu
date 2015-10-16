@@ -35,7 +35,7 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 	}
 
 	if len(foodItems) > 0 {
-		tab.OutstandingFood = append(tab.OutstandingFood, foodItems...)
+		tab.OutstandingFoods = append(tab.OutstandingFoods, foodItems...)
 		Send(foodOrdered, NewFoodOrdered(cmd.ID, foodItems))
 	}
 
@@ -65,6 +65,27 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 	}
 
 	Send(drinksServed, NewDrinksServed(cmd.ID, cmd.Items))
+	return nil
+}
+
+func MarkFoodPreparedHandler(msg *nsq.Message) error {
+	cmd := new(MarkFoodPrepared).FromJSON(msg.Body)
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(cmd.ID)
+	if tab == nil {
+		Send(exception, TabNotOpenException)
+		return nil
+	}
+
+	if !tab.AreFoodsOutstanding(cmd.Items) {
+		Send(exception, FoodsNotOutstanding)
+		return nil
+	}
+
+	Send(foodPrepared, NewFoodPrepared(cmd.ID, cmd.Items))
 	return nil
 }
 

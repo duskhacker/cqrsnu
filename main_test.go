@@ -59,7 +59,7 @@ var _ = Describe("Main", func() {
 		})
 	})
 
-	Describe("PlaceOrder", func() {
+	Describe("Ordering", func() {
 		Describe("with no tab opened", func() {
 			It("receives error", func() {
 				done := make(chan bool)
@@ -116,20 +116,20 @@ var _ = Describe("Main", func() {
 				Send(openTab, openTabCmd)
 			})
 
-			It("orders drinks", func() {
+			It("drinks", func() {
 
 				Send(placeOrder, NewPlaceOrder(tabID, drinks))
 
 				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "DrinksOrdered not received")
 			})
 
-			It("orders food", func() {
+			It("food", func() {
 				Send(placeOrder, NewPlaceOrder(tabID, food))
 
 				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
 			})
 
-			It("orders food and drink", func() {
+			It("food and drink", func() {
 				Send(placeOrder, NewPlaceOrder(tabID, append(food, drinks...)))
 
 				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
@@ -220,21 +220,37 @@ var _ = Describe("Main", func() {
 
 	})
 
+	Describe("Food", func() {
+
+		BeforeEach(func() {
+			Send(openTab, openTabCmd)
+			Send(placeOrder, NewPlaceOrder(tabID, food))
+		})
+
+		Describe("prepare", func() {
+			It("marks food prepared", func() {
+				rcvdFoodPrepared := make(chan bool)
+				listenForUnexpectedException()
+				newTestConsumer(foodPrepared, foodPrepared+"TestConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						evt := new(FoodPrepared).FromJSON(m.Body)
+						Expect(evt.Items).To(Equal(food))
+						rcvdFoodPrepared <- true
+						return nil
+					})
+
+				Send(markFoodPrepared, NewMarkFoodPrepared(tabID, food))
+				Eventually(rcvdFoodPrepared).Should(Receive(BeTrue()), "FoodPrepared not received")
+			})
+		})
+	})
+
 	Describe("Closing Tab", func() {
 		BeforeEach(func() {
-			openTabCmd = NewOpenTab(1, "Kinessa")
-			tabID = openTabCmd.ID
-
-			openTabCmd2 := NewOpenTab(1, "Veronica")
-			tabID2 := openTabCmd2.ID
-
 			Send(openTab, openTabCmd)
 			Send(placeOrder, NewPlaceOrder(tabID, drinks))
 			Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
-
-			Send(openTab, openTabCmd2)
-			Send(placeOrder, NewPlaceOrder(tabID2, drinks))
-			Send(markDrinksServed, NewMarkDrinksServed(tabID2, drinks))
 
 			rcvdDrinksServed := make(chan bool)
 			newTestConsumer(drinksServed, drinksServed+"TestConsumer",

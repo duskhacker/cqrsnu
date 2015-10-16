@@ -11,6 +11,7 @@ const (
 	openTab          = "OpenTab"
 	placeOrder       = "PlaceOrder"
 	markDrinksServed = "MarkDrinksServed"
+	markFoodPrepared = "MarkFoodPrepared"
 	closeTab         = "CloseTab"
 )
 
@@ -78,6 +79,29 @@ func (mds MarkDrinksServed) FromJSON(data []byte) MarkDrinksServed {
 
 func NewMarkDrinksServed(id uuid.UUID, items []OrderedItem) MarkDrinksServed {
 	return MarkDrinksServed{
+		ID:    id,
+		Items: items,
+	}
+}
+
+// --
+
+type MarkFoodPrepared struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (mfp MarkFoodPrepared) FromJSON(data []byte) MarkFoodPrepared {
+	var err error
+	err = json.Unmarshal(data, &mfp)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return mfp
+}
+
+func NewMarkFoodPrepared(id uuid.UUID, items []OrderedItem) MarkFoodPrepared {
+	return MarkFoodPrepared{
 		ID:    id,
 		Items: items,
 	}
