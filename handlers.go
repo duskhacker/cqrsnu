@@ -3,19 +3,19 @@ package main
 import "github.com/bitly/go-nsq"
 
 func OpenTabHandler(msg *nsq.Message) error {
-	ot := new(OpenTab).FromJson(msg.Body)
-	NewTab(ot.ID, ot.TableNumber, ot.WaitStaff, nil, nil, true, 0)
-	Send(tabOpened, NewTabOpened(ot.ID, ot.TableNumber, ot.WaitStaff))
+	cmd := new(OpenTab).FromJSON(msg.Body)
+	NewTab(cmd.ID, cmd.TableNumber, cmd.WaitStaff, nil, nil, true, 0)
+	Send(tabOpened, NewTabOpened(cmd.ID, cmd.TableNumber, cmd.WaitStaff))
 	return nil
 }
 
 func PlaceOrderHandler(msg *nsq.Message) error {
-	order := new(PlaceOrder).FromJson(msg.Body)
+	cmd := new(PlaceOrder).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	tab := GetTab(order.ID)
+	tab := GetTab(cmd.ID)
 	if tab == nil {
 		Send(exception, TabNotOpenException)
 		return nil
@@ -26,7 +26,7 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 		drinkItems []OrderedItem
 	)
 
-	for _, item := range order.Items {
+	for _, item := range cmd.Items {
 		if item.IsDrink {
 			drinkItems = append(drinkItems, item)
 		} else {
@@ -36,52 +36,69 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 
 	if len(foodItems) > 0 {
 		tab.OutstandingFood = append(tab.OutstandingFood, foodItems...)
-		Send(foodOrdered, NewFoodOrdered(order.ID, foodItems))
+		Send(foodOrdered, NewFoodOrdered(cmd.ID, foodItems))
 	}
 
 	if len(drinkItems) > 0 {
 		tab.OutstandingDrinks = append(tab.OutstandingDrinks, drinkItems...)
-		Send(drinksOrdered, NewDrinksOrdered(order.ID, drinkItems))
+		Send(drinksOrdered, NewDrinksOrdered(cmd.ID, drinkItems))
 	}
 
 	return nil
 }
 
 func MarkDrinksServedHandler(msg *nsq.Message) error {
-	c := new(MarkDrinksServed).FromJson(msg.Body)
+	cmd := new(MarkDrinksServed).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	tab := GetTab(c.ID)
+	tab := GetTab(cmd.ID)
 	if tab == nil {
 		Send(exception, TabNotOpenException)
 		return nil
 	}
 
-	if !tab.AreDrinksOutstanding(c.MenuNumbers) {
+	if !tab.AreDrinksOutstanding(cmd.Items) {
 		Send(exception, DrinksNotOutstanding)
 		return nil
 	}
 
-	Send(drinksServed, NewDrinksServed(c.ID, c.MenuNumbers))
+	Send(drinksServed, NewDrinksServed(cmd.ID, cmd.Items))
 	return nil
 }
 
 func DrinksServedHandler(msg *nsq.Message) error {
-	c := new(DrinksServed).FromJson(msg.Body)
+	evt := new(DrinksServed).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	tab := GetTab(c.ID)
-
+	tab := GetTab(evt.ID)
 	if tab == nil {
 		Send(exception, TabNotOpenException)
 		return nil
 	}
 
-	tab.DeleteOutstandingDrinks(c.MenuNumbers)
+	tab.AddServedItemsValue(evt.Items)
+	tab.DeleteOutstandingDrinks(evt.Items)
 
+	return nil
+}
+
+func CloseTabHandler(msg *nsq.Message) error {
+	cmd := new(CloseTab).FromJSON(msg.Body)
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(cmd.ID)
+	if tab == nil {
+		Send(exception, TabNotOpenException)
+		return nil
+	}
+
+	tipValue := cmd.AmountPaid - tab.ServedItemsValue
+
+	Send(tabClosed, NewTabClosed(cmd.ID, cmd.AmountPaid, tab.ServedItemsValue, tipValue))
 	return nil
 }

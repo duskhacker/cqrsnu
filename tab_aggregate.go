@@ -25,15 +25,15 @@ type Tab struct {
 	ServedItemsValue  float64
 }
 
-func NewTab(id uuid.UUID, tn int, ws string, od []OrderedItem, of []OrderedItem, open bool, siv float64) *Tab {
+func NewTab(id uuid.UUID, table int, staff string, drinks []OrderedItem, food []OrderedItem, open bool, siv float64) *Tab {
 	mutex.Lock()
 	defer mutex.Unlock()
 	tab := &Tab{
 		ID:                id,
-		TableNumber:       tn,
-		WaitStaff:         ws,
-		OutstandingDrinks: od,
-		OutstandingFood:   of,
+		TableNumber:       table,
+		WaitStaff:         staff,
+		OutstandingDrinks: drinks,
+		OutstandingFood:   food,
 		Open:              open,
 		ServedItemsValue:  siv,
 	}
@@ -49,10 +49,10 @@ func GetTab(id uuid.UUID) *Tab {
 	return tab
 }
 
-func (t Tab) AreDrinksOutstanding(drinks []int) bool {
+func (t Tab) AreDrinksOutstanding(drinks []OrderedItem) bool {
 	for _, drink := range drinks {
 		for _, outstanding := range t.OutstandingDrinks {
-			if drink == outstanding.MenuNumber {
+			if drink == outstanding {
 				return true
 			}
 		}
@@ -60,16 +60,13 @@ func (t Tab) AreDrinksOutstanding(drinks []int) bool {
 	return false
 }
 
-func indexOfOrderedItem(items []OrderedItem, menuNumber int) int {
-	for i, e := range items {
-		if e.MenuNumber == menuNumber {
-			return i
-		}
+func (t *Tab) AddServedItemsValue(items []OrderedItem) {
+	for _, item := range items {
+		t.ServedItemsValue += item.Price
 	}
-	return -1
 }
 
-func (t *Tab) DeleteOutstandingDrinks(items []int) error {
+func (t *Tab) DeleteOutstandingDrinks(items []OrderedItem) error {
 	for _, item := range items {
 		drinks, err := deleteOrderedItem(t.OutstandingDrinks, item)
 		if err != nil {
@@ -80,7 +77,7 @@ func (t *Tab) DeleteOutstandingDrinks(items []int) error {
 	return nil
 }
 
-func deleteOrderedItem(items []OrderedItem, item int) ([]OrderedItem, error) {
+func deleteOrderedItem(items []OrderedItem, item OrderedItem) ([]OrderedItem, error) {
 	idx := indexOfOrderedItem(items, item)
 	if idx < 0 {
 		return nil, fmt.Errorf("no item %#v in tab", item)
@@ -91,6 +88,15 @@ func deleteOrderedItem(items []OrderedItem, item int) ([]OrderedItem, error) {
 		log.Fatalf("error copying data for deleteOutstandingDrinks")
 	}
 	return append(a[:idx], a[idx+1:]...), nil
+}
+
+func indexOfOrderedItem(items []OrderedItem, item OrderedItem) int {
+	for i, e := range items {
+		if e == item {
+			return i
+		}
+	}
+	return -1
 }
 
 // -

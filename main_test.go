@@ -12,33 +12,50 @@ import (
 
 var pf = fmt.Printf
 
+var testConsumers []*nsq.Consumer
+
 var _ = Describe("Main", func() {
+
+	var (
+		openTabCmd OpenTab
+		tabID      uuid.UUID
+		drinks     []OrderedItem
+		food       []OrderedItem
+	)
+
 	BeforeEach(func() {
 		Tabs = NewTabs()
-		nsqConfig.MaxInFlight = maxConcurrentHttpRequests
-		connectToNSQD = true
-		initConsumers()
+		openTabCmd = NewOpenTab(1, "Kinessa")
+		tabID = openTabCmd.ID
+
+		drinks = []OrderedItem{}
+		drinks = append(drinks, NewOrderedItem(1, "Patron", true, 5.00))
+		drinks = append(drinks, NewOrderedItem(2, "Scotch", true, 3.50))
+
+		food = []OrderedItem{}
+		food = append(food, NewOrderedItem(1, "Steak", false, 15.00))
+		food = append(food, NewOrderedItem(2, "Burger", false, 8.00))
+	})
+
+	AfterEach(func() {
+		stopallTestConsumers()
 	})
 
 	Describe("Tab", func() {
 		It("opens a tab", func() {
 			done := make(chan bool)
-			command := NewOpenTab(1, "Veronica")
-			expected := NewTabOpened(command.ID, 1, "Veronica")
 
-			f := func(m *nsq.Message) error {
-				defer GinkgoRecover()
-				Expect(new(TabOpened).FromJson(m.Body)).To(Equal(expected))
-				done <- true
-				return nil
-			}
+			newTestConsumer(tabOpened, tabOpened+"TestConsumer",
+				func(m *nsq.Message) error {
+					defer GinkgoRecover()
+					Expect(new(TabOpened).FromJSON(m.Body)).To(Equal(NewTabOpened(tabID, 1, "Kinessa")))
+					done <- true
+					return nil
+				})
 
-			c := newConsumer(tabOpened, tabOpened+"TestConsumer", f)
+			Send(openTab, openTabCmd)
 
-			Send(openTab, command)
-
-			Eventually(done).Should(Receive(BeTrue()), "No TabOpened Event generated")
-			c.Stop()
+			Eventually(done).Should(Receive(BeTrue()), "No TabOpened received")
 		})
 	})
 
@@ -48,215 +65,223 @@ var _ = Describe("Main", func() {
 				done := make(chan bool)
 				command := NewPlaceOrder(nil, nil)
 
-				f := func(m *nsq.Message) error {
-					ex := new(CommandException).FromJson(m.Body)
-					defer GinkgoRecover()
-					Expect(ex).To(Equal(TabNotOpenException))
-					done <- true
-					return nil
-				}
-
-				c := newConsumer(exception, exception+"TestConsumer", f)
+				newTestConsumer(exception, exception+"TestConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						Expect(new(Exception).FromJSON(m.Body)).To(Equal(TabNotOpenException))
+						done <- true
+						return nil
+					})
 
 				Send(placeOrder, command)
 
 				Eventually(done).Should(Receive(BeTrue()), "TabNotOpenException Exception not Raised")
-				c.Stop()
 			})
 		})
 
 		Describe("with tab opened", func() {
 			var (
-				c1, c2, c3 *nsq.Consumer
-				id         uuid.UUID
-
 				foodOrderedDone   = make(chan bool)
 				drinksOrderedDone = make(chan bool)
-
-				drink OrderedItem
-				food  OrderedItem
 			)
 
 			BeforeEach(func() {
-				drink = NewOrderedItem(1, "Patron", true, 5.00)
-				food = NewOrderedItem(1, "Steak", false, 15.00)
 
-				dof := func(m *nsq.Message) error {
-					order := new(DrinksOrdered).FromJson(m.Body)
-					if len(order.Items) > 0 {
-						drinksOrderedDone <- true
-					}
-					return nil
-				}
+				newTestConsumer(drinksOrdered, drinksOrdered+"TestConsumer",
+					func(m *nsq.Message) error {
+						order := new(DrinksOrdered).FromJSON(m.Body)
+						if len(order.Items) > 0 {
+							drinksOrderedDone <- true
+						}
+						return nil
+					})
 
-				c1 = newConsumer(drinksOrdered, drinksOrdered+"TestConsumer", dof)
+				newTestConsumer(foodOrdered, foodOrdered+"TestConsumer",
+					func(m *nsq.Message) error {
+						order := new(FoodOrdered).FromJSON(m.Body)
+						if len(order.Items) > 0 {
+							foodOrderedDone <- true
+						}
+						return nil
+					})
 
-				fof := func(m *nsq.Message) error {
-					order := new(FoodOrdered).FromJson(m.Body)
-					if len(order.Items) > 0 {
-						foodOrderedDone <- true
-					}
-					return nil
-				}
+				newTestConsumer(exception, exception+"TestConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						ex := new(Exception).FromJSON(m.Body)
+						Expect(ex).To(BeNil())
+						return nil
+					})
 
-				c2 = newConsumer(foodOrdered, foodOrdered+"TestConsumer", fof)
-
-				exf := func(m *nsq.Message) error {
-					defer GinkgoRecover()
-					ex := new(CommandException).FromJson(m.Body)
-					Expect(ex).To(BeNil())
-					return nil
-				}
-
-				c3 = newConsumer(exception, exception+"TestConsumer", exf)
-
-				command := NewOpenTab(1, "Veronica")
-				id = command.ID
-
-				Send(openTab, command)
-			})
-
-			AfterEach(func() {
-				c1.Stop()
-				c2.Stop()
-				c3.Stop()
+				Send(openTab, openTabCmd)
 			})
 
 			It("orders drinks", func() {
-				Send(placeOrder, NewPlaceOrder(id, []OrderedItem{drink}))
 
-				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "No DrinksOrdered event generated")
+				Send(placeOrder, NewPlaceOrder(tabID, drinks))
+
+				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "DrinksOrdered not received")
 			})
 
 			It("orders food", func() {
-				command := NewPlaceOrder(id, []OrderedItem{food})
+				Send(placeOrder, NewPlaceOrder(tabID, food))
 
-				Send(placeOrder, command)
-
-				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "No FoodOrdered event generated")
+				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
 			})
 
 			It("orders food and drink", func() {
-				command := NewPlaceOrder(id, []OrderedItem{food, drink})
+				Send(placeOrder, NewPlaceOrder(tabID, append(food, drinks...)))
 
-				Send(placeOrder, command)
-
-				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "No FoodOrdered event generated")
-				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "No DrinksOrdered event generated")
+				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
+				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "DrinksOrdered not received")
 			})
 		})
 	})
 
 	Describe("Serving Drinks", func() {
-		var (
-			id uuid.UUID
-
-			drinks []OrderedItem
-		)
-
 		BeforeEach(func() {
-			drinks = append(drinks, NewOrderedItem(1, "Patron", true, 5.00))
-			drinks = append(drinks, NewOrderedItem(2, "Scotch", true, 7.00))
-
-			command := NewOpenTab(1, "Veronica")
-			id = command.ID
-
-			Send(openTab, command)
+			Send(openTab, openTabCmd)
 		})
 
 		Describe("with 1 drink ordered", func() {
 			BeforeEach(func() {
-				Send(placeOrder, NewPlaceOrder(id, []OrderedItem{drinks[0]}))
+				Send(placeOrder, NewPlaceOrder(tabID, drinks[:1]))
 			})
 
 			It("generates exception if second drink is marked served", func() {
 				done := make(chan bool)
 
-				f := func(m *nsq.Message) error {
-					ex := new(CommandException).FromJson(m.Body)
+				newTestConsumer(exception, exception+"TestConsumer", func(m *nsq.Message) error {
+					ex := new(Exception).FromJSON(m.Body)
 					defer GinkgoRecover()
 					Expect(ex).To(Equal(DrinksNotOutstanding))
 					done <- true
 					return nil
-				}
-				c := newConsumer(exception, exception+"TestConsumer", f)
+				})
 
-				Send(markDrinksServed, NewMarkDrinksServed(id, []int{drinks[1].MenuNumber}))
+				Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks[1:2]))
 
-				Eventually(done).Should(Receive(BeTrue()), "drinksNotOutstanding Exception not Raised")
-				c.Stop()
+				Eventually(done).Should(Receive(BeTrue()), "DrinksNotOutstanding Exception not Raised")
 			})
 		})
 
 		Describe("with drinks ordered", func() {
 			var (
-				menuNumbers      []int
 				drinksServedDone chan bool
 			)
 
 			BeforeEach(func() {
 				drinksServedDone = make(chan bool)
-				for _, drink := range drinks {
-					menuNumbers = append(menuNumbers, drink.MenuNumber)
-				}
 
-				Send(placeOrder, NewPlaceOrder(id, drinks))
+				Send(placeOrder, NewPlaceOrder(tabID, drinks))
 			})
 
 			It("marks drinks served", func() {
-				dsf := func(m *nsq.Message) error {
-					defer GinkgoRecover()
-					evt := new(DrinksServed).FromJson(m.Body)
-					Expect(evt.MenuNumbers).To(Equal(menuNumbers))
-					drinksServedDone <- true
-					return nil
-				}
 
-				c1 := newConsumer(drinksServed, drinksServed+"TestConsumer", dsf)
+				newTestConsumer(drinksServed, drinksServed+"TestConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						evt := new(DrinksServed).FromJSON(m.Body)
+						Expect(evt.Items).To(Equal(drinks))
+						drinksServedDone <- true
+						return nil
+					})
 
-				Send(markDrinksServed, NewMarkDrinksServed(id, menuNumbers))
-				Eventually(drinksServedDone).Should(Receive(BeTrue()), "No DrinksServed event generated")
-				c1.Stop()
+				Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
+				Eventually(drinksServedDone).Should(Receive(BeTrue()), "DrinksServed not received")
 			})
 
 			It("does not allow drinks to be served twice", func() {
-				gotException := make(chan bool)
-				exf := func(m *nsq.Message) error {
-					defer GinkgoRecover()
-					ex := new(CommandException).FromJson(m.Body)
-					Expect(ex).To(Equal(DrinksNotOutstanding))
-					gotException <- true
-					return nil
-				}
-				c1 := newConsumer(exception, exception+"TestExceptionConsumer", exf)
+				rcvdException := make(chan bool)
+				newTestConsumer(exception, exception+"TestExceptionConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						ex := new(Exception).FromJSON(m.Body)
+						Expect(ex).To(Equal(DrinksNotOutstanding))
+						rcvdException <- true
+						return nil
+					})
 
-				dsf := func(m *nsq.Message) error {
+				newTestConsumer(drinksServed, drinksServed+"TestConsumer", func(m *nsq.Message) error {
 					defer GinkgoRecover()
-					evt := new(DrinksServed).FromJson(m.Body)
-					Expect(evt.MenuNumbers).To(Equal(menuNumbers))
+					evt := new(DrinksServed).FromJSON(m.Body)
+					Expect(evt.Items).To(Equal(drinks))
 					drinksServedDone <- true
 					return nil
-				}
-				c2 := newConsumer(drinksServed, drinksServed+"TestConsumer", dsf)
+				})
 
-				Send(markDrinksServed, NewMarkDrinksServed(id, menuNumbers))
-				Eventually(drinksServedDone).Should(Receive(BeTrue()), "No DrinksServed event generated")
+				Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
+				Eventually(drinksServedDone).Should(Receive(BeTrue()), "DrinksServed not received")
 
-				Send(markDrinksServed, NewMarkDrinksServed(id, menuNumbers))
-				Eventually(gotException).Should(Receive(BeTrue()), "No Exception raised")
-
-				c1.Stop()
-				c2.Stop()
+				Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
+				Eventually(rcvdException).Should(Receive(BeTrue()), "DrinksNotOutstanding exception not received")
 			})
 		})
 
 	})
+
+	Describe("Closing Tab", func() {
+		BeforeEach(func() {
+			openTabCmd = NewOpenTab(1, "Kinessa")
+			tabID = openTabCmd.ID
+
+			openTabCmd2 := NewOpenTab(1, "Veronica")
+			tabID2 := openTabCmd2.ID
+
+			Send(openTab, openTabCmd)
+			Send(placeOrder, NewPlaceOrder(tabID, drinks))
+			Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
+
+			Send(openTab, openTabCmd2)
+			Send(placeOrder, NewPlaceOrder(tabID2, drinks))
+			Send(markDrinksServed, NewMarkDrinksServed(tabID2, drinks))
+
+			rcvdDrinksServed := make(chan bool)
+			newTestConsumer(drinksServed, drinksServed+"TestConsumer",
+				func(msg *nsq.Message) error {
+					rcvdDrinksServed <- true
+					return nil
+				})
+
+			Eventually(rcvdDrinksServed).Should(Receive(BeTrue()))
+		})
+
+		Describe("with tip", func() {
+			It("closes tab", func() {
+				tabClosedReceived := make(chan bool)
+				newTestConsumer(tabClosed, tabClosed+"TestConsumer",
+					func(msg *nsq.Message) error {
+						evt := new(TabClosed).FromJSON(msg.Body)
+						defer GinkgoRecover()
+						Expect(evt.AmountPaid).To(Equal(8.50 + 0.50))
+						Expect(evt.OrderValue).To(Equal(8.50))
+						Expect(evt.TipValue).To(Equal(0.5))
+						tabClosedReceived <- true
+						return nil
+					})
+
+				Send(closeTab, NewCloseTab(tabID, 8.50+0.50))
+
+				Eventually(tabClosedReceived).Should(Receive(BeTrue()), "TabClosed not received")
+			})
+		})
+	})
 })
+
+func newTestConsumer(topic, channel string, f func(*nsq.Message) error) {
+	testConsumers = append(testConsumers, newConsumer(topic, channel, f))
+}
+
+func stopallTestConsumers() {
+	for _, consumer := range testConsumers {
+		consumer.Stop()
+	}
+}
 
 func listenForUnexpectedException() {
 	f := func(m *nsq.Message) error {
-		pf("EXCEPTION: %#v\n", new(CommandException).FromJson(m.Body))
+		pf("EXCEPTION: %#v\n", new(Exception).FromJSON(m.Body))
 		return nil
 	}
-	_ = newConsumer(exception, exception+"UnexpectedExceptionConsumer", f)
+	newTestConsumer(exception, exception+"UnexpectedExceptionConsumer", f)
 }

@@ -50,9 +50,13 @@ var _ = BeforeSuite(func() {
 	serverSession, err = gexec.Start(command, GinkgoWriter, GinkgoWriter)
 	Expect(err).ToNot(HaveOccurred())
 	Eventually(serverSession.Err, "2s").Should(gbytes.Say(`TCP: listening on`))
+
+	connectToNSQD = true
+	InitConsumers()
 })
 
 var _ = AfterSuite(func() {
+	StopAllConsumers()
 	serverSession.Interrupt()
 	gexec.CleanupBuildArtifacts()
 })

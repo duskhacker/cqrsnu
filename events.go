@@ -12,6 +12,7 @@ const (
 	foodOrdered   = "FoodOrdered"
 	drinksOrdered = "DrinksOrdered"
 	drinksServed  = "DrinksServed"
+	tabClosed     = "TabClosed"
 	exception     = "Exception"
 )
 
@@ -21,7 +22,7 @@ type TabOpened struct {
 	WaitStaff   string
 }
 
-func (t TabOpened) FromJson(data []byte) TabOpened {
+func (t TabOpened) FromJSON(data []byte) TabOpened {
 	var err error
 	err = json.Unmarshal(data, &t)
 	if err != nil {
@@ -45,7 +46,7 @@ type DrinksOrdered struct {
 	Items []OrderedItem
 }
 
-func (do DrinksOrdered) FromJson(data []byte) DrinksOrdered {
+func (do DrinksOrdered) FromJSON(data []byte) DrinksOrdered {
 	var err error
 	err = json.Unmarshal(data, &do)
 	if err != nil {
@@ -68,7 +69,7 @@ type FoodOrdered struct {
 	Items []OrderedItem
 }
 
-func (fo FoodOrdered) FromJson(data []byte) FoodOrdered {
+func (fo FoodOrdered) FromJSON(data []byte) FoodOrdered {
 	var err error
 	err = json.Unmarshal(data, &fo)
 	if err != nil {
@@ -87,11 +88,11 @@ func NewFoodOrdered(id uuid.UUID, items []OrderedItem) FoodOrdered {
 // --
 
 type DrinksServed struct {
-	ID          uuid.UUID
-	MenuNumbers []int
+	ID    uuid.UUID
+	Items []OrderedItem
 }
 
-func (ds DrinksServed) FromJson(data []byte) DrinksServed {
+func (ds DrinksServed) FromJSON(data []byte) DrinksServed {
 	var err error
 	err = json.Unmarshal(data, &ds)
 	if err != nil {
@@ -100,11 +101,63 @@ func (ds DrinksServed) FromJson(data []byte) DrinksServed {
 	return ds
 }
 
-func NewDrinksServed(id uuid.UUID, items []int) DrinksServed {
+func NewDrinksServed(id uuid.UUID, items []OrderedItem) DrinksServed {
 	return DrinksServed{
-		ID:          id,
-		MenuNumbers: items,
+		ID:    id,
+		Items: items,
 	}
 }
 
 // --
+
+type TabClosed struct {
+	ID         uuid.UUID
+	AmountPaid float64
+	OrderValue float64
+	TipValue   float64
+}
+
+func (tc TabClosed) FromJSON(data []byte) TabClosed {
+	var err error
+	err = json.Unmarshal(data, &tc)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return tc
+}
+
+func NewTabClosed(id uuid.UUID, amountPaid, orderValue, tipValue float64) TabClosed {
+	return TabClosed{
+		ID:         id,
+		AmountPaid: amountPaid,
+		OrderValue: orderValue,
+		TipValue:   tipValue,
+	}
+}
+
+// --
+
+type Exception struct {
+	Type    string
+	Message string
+}
+
+func (e Exception) FromJSON(data []byte) Exception {
+	var err error
+	err = json.Unmarshal(data, &e)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return e
+}
+
+func NewException(t string, msg string) Exception {
+	return Exception{Type: t, Message: msg}
+}
+
+func (c Exception) Error() string {
+	return c.Type + ":" + c.Message
+}
+
+var TabNotOpenException = NewException("TabNotOpen", "Cannot Place order without open Tab")
+var DrinksNotOutstanding = NewException("DrinksNotOutstanding", "Cannot serve unordered drinks")

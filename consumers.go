@@ -7,18 +7,15 @@ import (
 )
 
 var (
-	openTabConsumer          *nsq.Consumer
-	tapOpenedConsumer        *nsq.Consumer
-	placeOrderConsumer       *nsq.Consumer
-	markDrinksServedConsumer *nsq.Consumer
-	drinksServedConsumer     *nsq.Consumer
+	consumers []*nsq.Consumer
 )
 
-func initConsumers() {
-	openTabConsumer = newConsumer(openTab, openTab+"Consumer", OpenTabHandler)
-	placeOrderConsumer = newConsumer(placeOrder, placeOrder+"Consumer", PlaceOrderHandler)
-	markDrinksServedConsumer = newConsumer(markDrinksServed, markDrinksServed+"Consumer", MarkDrinksServedHandler)
-	drinksServedConsumer = newConsumer(drinksServed, drinksServed+"Consumer", DrinksServedHandler)
+func InitConsumers() {
+	newConsumer(openTab, openTab+"Consumer", OpenTabHandler)
+	newConsumer(placeOrder, placeOrder+"Consumer", PlaceOrderHandler)
+	newConsumer(markDrinksServed, markDrinksServed+"Consumer", MarkDrinksServedHandler)
+	newConsumer(drinksServed, drinksServed+"Consumer", DrinksServedHandler)
+	newConsumer(closeTab, closeTab+"Consumer", CloseTabHandler)
 }
 
 func newConsumer(topic, channel string, handler func(*nsq.Message) error) *nsq.Consumer {
@@ -42,5 +39,13 @@ func newConsumer(topic, channel string, handler func(*nsq.Message) error) *nsq.C
 			log.Fatalf("%s:%s; ConnectToNSQLookupds: %s", topic, channel, err)
 		}
 	}
+
+	consumers = append(consumers, consumer)
 	return consumer
+}
+
+func StopAllConsumers() {
+	for _, consumer := range consumers {
+		consumer.Stop()
+	}
 }

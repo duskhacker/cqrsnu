@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxConcurrentHttpRequests = 100
+	maxConcurrentHttpRequests = 5
 )
 
 var (
@@ -34,5 +34,6 @@ func main() {
 	Tabs = NewTabs()
 
 	nsqConfig.MaxInFlight = maxConcurrentHttpRequests
-	initConsumers()
+	InitConsumers()
+	StopAllConsumers()
 }
