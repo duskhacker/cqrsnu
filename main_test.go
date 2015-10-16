@@ -60,7 +60,7 @@ var _ = Describe("Main", func() {
 
 				Send(placeOrder, command)
 
-				Eventually(done).Should(Receive(BeTrue()), "PlaceOrder Exception not Raised")
+				Eventually(done).Should(Receive(BeTrue()), "TabNotOpenException Exception not Raised")
 				c.Stop()
 			})
 		})
