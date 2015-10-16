@@ -44,14 +44,14 @@ var _ = Describe("Main", func() {
 
 	Describe("PlaceOrder", func() {
 		Describe("with no tab opened", func() {
-			done := make(chan bool)
 			It("receives error", func() {
+				done := make(chan bool)
 				command := NewPlaceOrder(nil, nil)
 
 				f := func(m *nsq.Message) error {
 					ex := new(CommandException).FromJson(m.Body)
 					defer GinkgoRecover()
-					Expect(ex).To(Equal(tabNotOpenException))
+					Expect(ex).To(Equal(TabNotOpenException))
 					done <- true
 					return nil
 				}
@@ -175,7 +175,7 @@ var _ = Describe("Main", func() {
 				f := func(m *nsq.Message) error {
 					ex := new(CommandException).FromJson(m.Body)
 					defer GinkgoRecover()
-					Expect(ex).To(Equal(drinksNotOutstanding))
+					Expect(ex).To(Equal(DrinksNotOutstanding))
 					done <- true
 					return nil
 				}
@@ -224,7 +224,7 @@ var _ = Describe("Main", func() {
 				exf := func(m *nsq.Message) error {
 					defer GinkgoRecover()
 					ex := new(CommandException).FromJson(m.Body)
-					Expect(ex).To(Equal(drinksNotOutstanding))
+					Expect(ex).To(Equal(DrinksNotOutstanding))
 					gotException <- true
 					return nil
 				}

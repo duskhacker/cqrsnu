@@ -17,7 +17,7 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 
 	tab := GetTab(order.ID)
 	if tab == nil {
-		Send(exception, tabNotOpenException)
+		Send(exception, TabNotOpenException)
 		return nil
 	}
 
@@ -55,12 +55,12 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 
 	tab := GetTab(c.ID)
 	if tab == nil {
-		Send(exception, tabNotOpenException)
+		Send(exception, TabNotOpenException)
 		return nil
 	}
 
 	if !tab.AreDrinksOutstanding(c.MenuNumbers) {
-		Send(exception, drinksNotOutstanding)
+		Send(exception, DrinksNotOutstanding)
 		return nil
 	}
 
@@ -77,7 +77,7 @@ func DrinksServedHandler(msg *nsq.Message) error {
 	tab := GetTab(c.ID)
 
 	if tab == nil {
-		Send(exception, tabNotOpenException)
+		Send(exception, TabNotOpenException)
 		return nil
 	}
 

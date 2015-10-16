@@ -3,12 +3,9 @@ package main
 import (
 	"encoding/json"
 	"log"
-
-	"code.google.com/p/go-uuid/uuid"
 )
 
 type CommandException struct {
-	Guid    uuid.UUID
 	Type    string
 	Message string
 }
@@ -22,13 +19,13 @@ func (c CommandException) FromJson(data []byte) CommandException {
 	return c
 }
 
-func NewCommandException(guid uuid.UUID, t string, msg string) CommandException {
-	return CommandException{Guid: guid, Type: t, Message: msg}
+func NewCommandException(t string, msg string) CommandException {
+	return CommandException{Type: t, Message: msg}
 }
 
 func (c CommandException) Error() string {
-	return c.Type + ":" + c.Message + "(" + c.Guid.String() + ")"
+	return c.Type + ":" + c.Message
 }
 
-var tabNotOpenException = NewCommandException(nil, "TabNotOpen", "Cannot Place order without open Tab")
-var drinksNotOutstanding = NewCommandException(nil, "DrinksNotOutstanding", "Cannot serve unordered drinks")
+var TabNotOpenException = NewCommandException("TabNotOpen", "Cannot Place order without open Tab")
+var DrinksNotOutstanding = NewCommandException("DrinksNotOutstanding", "Cannot serve unordered drinks")
