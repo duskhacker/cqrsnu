@@ -68,6 +68,27 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 	return nil
 }
 
+func MarkFoodServedHandler(msg *nsq.Message) error {
+	cmd := new(MarkFoodServed).FromJSON(msg.Body)
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(cmd.ID)
+	if tab == nil {
+		Send(exception, TabNotOpenException)
+		return nil
+	}
+
+	if !tab.AreFoodsOutstanding(cmd.Items) {
+		Send(exception, FoodsNotOutstanding)
+		return nil
+	}
+
+	Send(foodServed, NewFoodServed(cmd.ID, cmd.Items))
+	return nil
+}
+
 func MarkFoodPreparedHandler(msg *nsq.Message) error {
 	cmd := new(MarkFoodPrepared).FromJSON(msg.Body)
 
@@ -103,6 +124,24 @@ func DrinksServedHandler(msg *nsq.Message) error {
 
 	tab.AddServedItemsValue(evt.Items)
 	tab.DeleteOutstandingDrinks(evt.Items)
+
+	return nil
+}
+
+func FoodServedHandler(msg *nsq.Message) error {
+	evt := new(FoodServed).FromJSON(msg.Body)
+
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	tab := GetTab(evt.ID)
+	if tab == nil {
+		Send(exception, TabNotOpenException)
+		return nil
+	}
+
+	tab.AddServedItemsValue(evt.Items)
+	tab.DeleteOutstandingFoods(evt.Items)
 
 	return nil
 }

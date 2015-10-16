@@ -13,6 +13,7 @@ const (
 	drinksOrdered = "DrinksOrdered"
 	drinksServed  = "DrinksServed"
 	foodPrepared  = "FoodPrepared"
+	foodServed    = "FoodServed"
 	tabClosed     = "TabClosed"
 	exception     = "Exception"
 )
@@ -127,6 +128,29 @@ func (fp FoodPrepared) FromJSON(data []byte) FoodPrepared {
 
 func NewFoodPrepared(id uuid.UUID, items []OrderedItem) FoodPrepared {
 	return FoodPrepared{
+		ID:    id,
+		Items: items,
+	}
+}
+
+// --
+
+type FoodServed struct {
+	ID    uuid.UUID
+	Items []OrderedItem
+}
+
+func (fs FoodServed) FromJSON(data []byte) FoodServed {
+	var err error
+	err = json.Unmarshal(data, &fs)
+	if err != nil {
+		log.Fatalf("json.Unmarshal: %s\n'", err)
+	}
+	return fs
+}
+
+func NewFoodServed(id uuid.UUID, items []OrderedItem) FoodServed {
+	return FoodServed{
 		ID:    id,
 		Items: items,
 	}

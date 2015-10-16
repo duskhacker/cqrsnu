@@ -230,7 +230,6 @@ var _ = Describe("Main", func() {
 		Describe("prepare", func() {
 			It("marks food prepared", func() {
 				rcvdFoodPrepared := make(chan bool)
-				listenForUnexpectedException()
 				newTestConsumer(foodPrepared, foodPrepared+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
@@ -242,6 +241,37 @@ var _ = Describe("Main", func() {
 
 				Send(markFoodPrepared, NewMarkFoodPrepared(tabID, food))
 				Eventually(rcvdFoodPrepared).Should(Receive(BeTrue()), "FoodPrepared not received")
+			})
+		})
+
+		Describe("serve", func() {
+			BeforeEach(func() {
+				rcvdFoodPrepared := make(chan bool)
+				newTestConsumer(foodPrepared, foodPrepared+"TestConsumer",
+					func(m *nsq.Message) error {
+						rcvdFoodPrepared <- true
+						return nil
+					})
+
+				Send(markFoodPrepared, NewMarkFoodPrepared(tabID, food))
+				Eventually(rcvdFoodPrepared).Should(Receive(BeTrue()), "FoodPrepared not received")
+
+			})
+
+			It("marks food served", func() {
+				listenForUnexpectedException()
+				rcvdFoodServed := make(chan bool)
+				newTestConsumer(foodServed, foodServed+"TestConsumer",
+					func(m *nsq.Message) error {
+						defer GinkgoRecover()
+						evt := new(FoodServed).FromJSON(m.Body)
+						Expect(evt.Items).To(Equal(food))
+						rcvdFoodServed <- true
+						return nil
+					})
+
+				Send(markFoodServed, NewMarkFoodServed(tabID, food))
+				Eventually(rcvdFoodServed).Should(Receive(BeTrue()), "FoodServed not received")
 			})
 		})
 	})

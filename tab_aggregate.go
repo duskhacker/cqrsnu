@@ -84,6 +84,17 @@ func (t *Tab) DeleteOutstandingDrinks(items []OrderedItem) error {
 	return nil
 }
 
+func (t *Tab) DeleteOutstandingFoods(items []OrderedItem) error {
+	for _, item := range items {
+		foods, err := deleteOrderedItem(t.OutstandingFoods, item)
+		if err != nil {
+			return err
+		}
+		t.OutstandingFoods = foods
+	}
+	return nil
+}
+
 func deleteOrderedItem(items []OrderedItem, item OrderedItem) ([]OrderedItem, error) {
 	idx := indexOfOrderedItem(items, item)
 	if idx < 0 {
