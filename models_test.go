@@ -7,6 +7,11 @@ import (
 
 var _ = Describe("Models", func() {
 	Describe("DeleteOrderedItem", func() {
+
+		BeforeEach(func() {
+			Tabs = NewTabs()
+		})
+
 		It("deletes an item", func() {
 			drink1 := NewOrderedItem(5, "drink1", true, 0.0)
 			drink2 := NewOrderedItem(1, "drink2", true, 0.0)

@@ -31,6 +31,8 @@ func Serialize(object interface{}) []byte {
 }
 
 func main() {
+	Tabs = NewTabs()
+
 	nsqConfig.MaxInFlight = maxConcurrentHttpRequests
 	initConsumers()
 }

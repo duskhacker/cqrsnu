@@ -13,8 +13,8 @@ import (
 var pf = fmt.Printf
 
 var _ = Describe("Main", func() {
-
 	BeforeEach(func() {
+		Tabs = NewTabs()
 		nsqConfig.MaxInFlight = maxConcurrentHttpRequests
 		connectToNSQD = true
 		initConsumers()

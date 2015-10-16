@@ -8,8 +8,12 @@ import (
 )
 
 var (
-	Tabs = make(map[string]*Tab)
+	Tabs map[string]*Tab
 )
+
+func NewTabs() map[string]*Tab {
+	return make(map[string]*Tab)
+}
 
 type Tab struct {
 	ID                uuid.UUID
