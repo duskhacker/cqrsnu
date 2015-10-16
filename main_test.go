@@ -279,8 +279,10 @@ var _ = Describe("Main", func() {
 	Describe("Closing Tab", func() {
 		BeforeEach(func() {
 			Send(openTab, openTabCmd)
-			Send(placeOrder, NewPlaceOrder(tabID, drinks))
+			Send(placeOrder, NewPlaceOrder(tabID, append(food, drinks...)))
 			Send(markDrinksServed, NewMarkDrinksServed(tabID, drinks))
+			Send(markFoodPrepared, NewMarkFoodPrepared(tabID, food))
+			Send(markFoodServed, NewMarkFoodServed(tabID, food))
 
 			rcvdDrinksServed := make(chan bool)
 			newTestConsumer(drinksServed, drinksServed+"TestConsumer",
@@ -299,14 +301,14 @@ var _ = Describe("Main", func() {
 					func(msg *nsq.Message) error {
 						evt := new(TabClosed).FromJSON(msg.Body)
 						defer GinkgoRecover()
-						Expect(evt.AmountPaid).To(Equal(8.50 + 0.50))
-						Expect(evt.OrderValue).To(Equal(8.50))
+						Expect(evt.AmountPaid).To(Equal(31.50 + 0.50))
+						Expect(evt.OrderValue).To(Equal(31.50))
 						Expect(evt.TipValue).To(Equal(0.5))
 						tabClosedReceived <- true
 						return nil
 					})
 
-				Send(closeTab, NewCloseTab(tabID, 8.50+0.50))
+				Send(closeTab, NewCloseTab(tabID, 31.50+0.50))
 
 				Eventually(tabClosedReceived).Should(Receive(BeTrue()), "TabClosed not received")
 			})

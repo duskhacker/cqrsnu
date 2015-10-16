@@ -16,6 +16,7 @@ func InitConsumers() {
 	newConsumer(markDrinksServed, markDrinksServed+"Consumer", MarkDrinksServedHandler)
 	newConsumer(markFoodPrepared, markFoodPrepared+"Consumer", MarkFoodPreparedHandler)
 	newConsumer(markFoodServed, markFoodServed+"Consumer", MarkFoodServedHandler)
+	newConsumer(foodServed, foodServed+"Consumer", FoodServedHandler)
 	newConsumer(drinksServed, drinksServed+"Consumer", DrinksServedHandler)
 	newConsumer(closeTab, closeTab+"Consumer", CloseTabHandler)
 }
