@@ -6,12 +6,10 @@ import (
 )
 
 var _ = Describe("TabAggegate", func() {
+	BeforeEach(func() {
+		Tabs = NewTabs()
+	})
 	Describe("DeleteOrderedItem", func() {
-
-		BeforeEach(func() {
-			Tabs = NewTabs()
-		})
-
 		It("deletes an item", func() {
 			drink0 := NewOrderedItem(5, "drink1", true, 0.0)
 			drink1 := NewOrderedItem(1, "drink2", true, 0.0)
@@ -38,6 +36,37 @@ var _ = Describe("TabAggegate", func() {
 			tab.DeleteOutstandingDrinks(drinks)
 			Expect(tab.OutstandingDrinks).To(ConsistOf([]OrderedItem{}))
 		})
+	})
+
+	Describe("AreDrinksOutstanding", func() {
+		var (
+			drinks []OrderedItem
+			tab    *Tab
+		)
+
+		BeforeEach(func() {
+			drink0 := NewOrderedItem(5, "drink1", true, 0.0)
+			drink1 := NewOrderedItem(1, "drink2", true, 0.0)
+			drink2 := NewOrderedItem(7, "drink3", true, 0.0)
+
+			drinks = []OrderedItem{}
+			drinks = append(drinks, drink0)
+			drinks = append(drinks, drink1)
+			drinks = append(drinks, drink2)
+
+		})
+
+		It("returns true if all are outstanding", func() {
+			tab = NewTab(nil, 0, "", drinks, nil, false, 0)
+			Expect(tab.AreDrinksOutstanding(drinks)).To(BeTrue())
+		})
+
+		It("returns false if any are not outstanding", func() {
+			tab = NewTab(nil, 0, "", drinks[:2], nil, false, 0)
+			Expect(tab.AreDrinksOutstanding(drinks)).To(BeFalse())
+
+		})
+
 	})
 
 })

@@ -20,7 +20,7 @@ type Tab struct {
 	TableNumber       int
 	WaitStaff         string
 	OutstandingDrinks []OrderedItem
-	OutstandingFood   []OrderedItem
+	OutstandingFoods  []OrderedItem
 	Open              bool
 	ServedItemsValue  float64
 }
@@ -33,7 +33,7 @@ func NewTab(id uuid.UUID, table int, staff string, drinks []OrderedItem, food []
 		TableNumber:       table,
 		WaitStaff:         staff,
 		OutstandingDrinks: drinks,
-		OutstandingFood:   food,
+		OutstandingFoods:  food,
 		Open:              open,
 		ServedItemsValue:  siv,
 	}
@@ -51,13 +51,20 @@ func GetTab(id uuid.UUID) *Tab {
 
 func (t Tab) AreDrinksOutstanding(drinks []OrderedItem) bool {
 	for _, drink := range drinks {
-		for _, outstanding := range t.OutstandingDrinks {
-			if drink == outstanding {
-				return true
-			}
+		if indexOfOrderedItem(t.OutstandingDrinks, drink) < 0 {
+			return false
 		}
 	}
-	return false
+	return true
+}
+
+func (t Tab) AreFoodsOutstanding(foods []OrderedItem) bool {
+	for _, food := range foods {
+		if indexOfOrderedItem(t.OutstandingFoods, food) < 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (t *Tab) AddServedItemsValue(items []OrderedItem) {
