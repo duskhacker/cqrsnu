@@ -38,7 +38,7 @@ var _ = Describe("Main", func() {
 	})
 
 	AfterEach(func() {
-		stopallTestConsumers()
+		stopAllTestConsumers()
 	})
 
 	Describe("Tab", func() {
@@ -320,7 +320,7 @@ func newTestConsumer(topic, channel string, f func(*nsq.Message) error) {
 	testConsumers = append(testConsumers, newConsumer(topic, channel, f))
 }
 
-func stopallTestConsumers() {
+func stopAllTestConsumers() {
 	for _, consumer := range testConsumers {
 		consumer.Stop()
 	}
