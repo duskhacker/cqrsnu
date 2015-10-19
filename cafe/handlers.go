@@ -3,21 +3,21 @@ package cafe
 import "github.com/bitly/go-nsq"
 
 func OpenTabHandler(msg *nsq.Message) error {
-	cmd := new(openTab).fromJSON(msg.Body)
+	cmd := new(OpenTab).FromJSON(msg.Body)
 	NewTab(cmd.ID, cmd.TableNumber, cmd.WaitStaff, nil, nil, true, 0)
-	Send(tabOpenedTopic, newTabOpened(cmd.ID, cmd.TableNumber, cmd.WaitStaff))
+	Send(TabOpenedTopic, NewTabOpened(cmd.ID, cmd.TableNumber, cmd.WaitStaff))
 	return nil
 }
 
 func PlaceOrderHandler(msg *nsq.Message) error {
-	cmd := new(placeOrder).fromJSON(msg.Body)
+	cmd := new(PlaceOrder).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	tab := GetTab(cmd.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
@@ -36,12 +36,12 @@ func PlaceOrderHandler(msg *nsq.Message) error {
 
 	if len(foodItems) > 0 {
 		tab.OutstandingFoods = append(tab.OutstandingFoods, foodItems...)
-		Send(foodOrderedTopic, newFoodOrdered(cmd.ID, foodItems))
+		Send(FoodOrderedTopic, NewFoodOrdered(cmd.ID, foodItems))
 	}
 
 	if len(drinkItems) > 0 {
 		tab.OutstandingDrinks = append(tab.OutstandingDrinks, drinkItems...)
-		Send(drinksOrderedTopic, newDrinksOrdered(cmd.ID, drinkItems))
+		Send(DrinksOrderedTopic, NewDrinksOrdered(cmd.ID, drinkItems))
 	}
 
 	return nil
@@ -55,16 +55,16 @@ func MarkDrinksServedHandler(msg *nsq.Message) error {
 
 	tab := GetTab(cmd.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
 	if !tab.AreDrinksOutstanding(cmd.Items) {
-		Send(exceptionTopic, DrinksNotOutstanding)
+		Send(ExceptionTopic, DrinksNotOutstanding)
 		return nil
 	}
 
-	Send(drinksServedTopic, newDrinksServed(cmd.ID, cmd.Items))
+	Send(DrinksServedTopic, NewDrinksServed(cmd.ID, cmd.Items))
 	return nil
 }
 
@@ -76,49 +76,49 @@ func MarkFoodServedHandler(msg *nsq.Message) error {
 
 	tab := GetTab(cmd.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
 	if !tab.AreFoodsOutstanding(cmd.Items) {
-		Send(exceptionTopic, FoodsNotOutstanding)
+		Send(ExceptionTopic, FoodsNotOutstanding)
 		return nil
 	}
 
-	Send(foodServedTopic, newFoodServed(cmd.ID, cmd.Items))
+	Send(FoodServedTopic, NewFoodServed(cmd.ID, cmd.Items))
 	return nil
 }
 
 func MarkFoodPreparedHandler(msg *nsq.Message) error {
-	cmd := new(markFoodPrepared).fromJSON(msg.Body)
+	cmd := new(MarkFoodPrepared).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	tab := GetTab(cmd.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
 	if !tab.AreFoodsOutstanding(cmd.Items) {
-		Send(exceptionTopic, FoodsNotOutstanding)
+		Send(ExceptionTopic, FoodsNotOutstanding)
 		return nil
 	}
 
-	Send(foodPreparedTopic, newFoodPrepared(cmd.ID, cmd.Items))
+	Send(FoodPreparedTopic, NewFoodPrepared(cmd.ID, cmd.Items))
 	return nil
 }
 
 func DrinksServedHandler(msg *nsq.Message) error {
-	evt := new(drinksServed).fromJSON(msg.Body)
+	evt := new(DrinksServed).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	tab := GetTab(evt.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
@@ -129,14 +129,14 @@ func DrinksServedHandler(msg *nsq.Message) error {
 }
 
 func FoodServedHandler(msg *nsq.Message) error {
-	evt := new(foodServed).fromJSON(msg.Body)
+	evt := new(FoodServed).FromJSON(msg.Body)
 
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	tab := GetTab(evt.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
@@ -153,12 +153,12 @@ func CloseTabHandler(msg *nsq.Message) error {
 
 	tab := GetTab(cmd.ID)
 	if tab == nil {
-		Send(exceptionTopic, TabNotOpenException)
+		Send(ExceptionTopic, TabNotOpenException)
 		return nil
 	}
 
 	tipValue := cmd.AmountPaid - tab.ServedItemsValue
 
-	Send(tabClosedTopic, newTabClosed(cmd.ID, cmd.AmountPaid, tab.ServedItemsValue, tipValue))
+	Send(TabClosedTopic, NewTabClosed(cmd.ID, cmd.AmountPaid, tab.ServedItemsValue, tipValue))
 	return nil
 }

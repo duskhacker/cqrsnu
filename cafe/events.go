@@ -8,23 +8,23 @@ import (
 )
 
 const (
-	tabOpenedTopic     = "TabOpened"
-	foodOrderedTopic   = "FoodOrdered"
-	drinksOrderedTopic = "DrinksOrdered"
-	drinksServedTopic  = "DrinksServed"
-	foodPreparedTopic  = "FoodPrepared"
-	foodServedTopic    = "FoodServed"
-	tabClosedTopic     = "TabClosed"
-	exceptionTopic     = "Exception"
+	TabOpenedTopic     = "TabOpened"
+	FoodOrderedTopic   = "FoodOrdered"
+	DrinksOrderedTopic = "DrinksOrdered"
+	DrinksServedTopic  = "DrinksServed"
+	FoodPreparedTopic  = "FoodPrepared"
+	FoodServedTopic    = "FoodServed"
+	TabClosedTopic     = "TabClosed"
+	ExceptionTopic     = "Exception"
 )
 
-type tabOpened struct {
+type TabOpened struct {
 	ID          uuid.UUID
 	TableNumber int
 	WaitStaff   string
 }
 
-func (t tabOpened) fromJSON(data []byte) tabOpened {
+func (t TabOpened) FromJSON(data []byte) TabOpened {
 	var err error
 	err = json.Unmarshal(data, &t)
 	if err != nil {
@@ -33,8 +33,8 @@ func (t tabOpened) fromJSON(data []byte) tabOpened {
 	return t
 }
 
-func newTabOpened(guid uuid.UUID, tableNumber int, waitStaff string) tabOpened {
-	return tabOpened{
+func NewTabOpened(guid uuid.UUID, tableNumber int, waitStaff string) TabOpened {
+	return TabOpened{
 		ID:          guid,
 		TableNumber: tableNumber,
 		WaitStaff:   waitStaff,
@@ -43,12 +43,12 @@ func newTabOpened(guid uuid.UUID, tableNumber int, waitStaff string) tabOpened {
 
 // --
 
-type drinksOrdered struct {
+type DrinksOrdered struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (do drinksOrdered) fromJSON(data []byte) drinksOrdered {
+func (do DrinksOrdered) FromJSON(data []byte) DrinksOrdered {
 	var err error
 	err = json.Unmarshal(data, &do)
 	if err != nil {
@@ -57,8 +57,8 @@ func (do drinksOrdered) fromJSON(data []byte) drinksOrdered {
 	return do
 }
 
-func newDrinksOrdered(id uuid.UUID, items []OrderedItem) drinksOrdered {
-	return drinksOrdered{
+func NewDrinksOrdered(id uuid.UUID, items []OrderedItem) DrinksOrdered {
+	return DrinksOrdered{
 		ID:    id,
 		Items: items,
 	}
@@ -66,12 +66,12 @@ func newDrinksOrdered(id uuid.UUID, items []OrderedItem) drinksOrdered {
 
 // --
 
-type foodOrdered struct {
+type FoodOrdered struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (fo foodOrdered) fromJSON(data []byte) foodOrdered {
+func (fo FoodOrdered) FromJSON(data []byte) FoodOrdered {
 	var err error
 	err = json.Unmarshal(data, &fo)
 	if err != nil {
@@ -80,8 +80,8 @@ func (fo foodOrdered) fromJSON(data []byte) foodOrdered {
 	return fo
 }
 
-func newFoodOrdered(id uuid.UUID, items []OrderedItem) foodOrdered {
-	return foodOrdered{
+func NewFoodOrdered(id uuid.UUID, items []OrderedItem) FoodOrdered {
+	return FoodOrdered{
 		ID:    id,
 		Items: items,
 	}
@@ -89,12 +89,12 @@ func newFoodOrdered(id uuid.UUID, items []OrderedItem) foodOrdered {
 
 // --
 
-type drinksServed struct {
+type DrinksServed struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (ds drinksServed) fromJSON(data []byte) drinksServed {
+func (ds DrinksServed) FromJSON(data []byte) DrinksServed {
 	var err error
 	err = json.Unmarshal(data, &ds)
 	if err != nil {
@@ -103,8 +103,8 @@ func (ds drinksServed) fromJSON(data []byte) drinksServed {
 	return ds
 }
 
-func newDrinksServed(id uuid.UUID, items []OrderedItem) drinksServed {
-	return drinksServed{
+func NewDrinksServed(id uuid.UUID, items []OrderedItem) DrinksServed {
+	return DrinksServed{
 		ID:    id,
 		Items: items,
 	}
@@ -112,12 +112,12 @@ func newDrinksServed(id uuid.UUID, items []OrderedItem) drinksServed {
 
 // --
 
-type foodPrepared struct {
+type FoodPrepared struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (fp foodPrepared) fromJSON(data []byte) foodPrepared {
+func (fp FoodPrepared) FromJSON(data []byte) FoodPrepared {
 	var err error
 	err = json.Unmarshal(data, &fp)
 	if err != nil {
@@ -126,8 +126,8 @@ func (fp foodPrepared) fromJSON(data []byte) foodPrepared {
 	return fp
 }
 
-func newFoodPrepared(id uuid.UUID, items []OrderedItem) foodPrepared {
-	return foodPrepared{
+func NewFoodPrepared(id uuid.UUID, items []OrderedItem) FoodPrepared {
+	return FoodPrepared{
 		ID:    id,
 		Items: items,
 	}
@@ -135,12 +135,12 @@ func newFoodPrepared(id uuid.UUID, items []OrderedItem) foodPrepared {
 
 // --
 
-type foodServed struct {
+type FoodServed struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (fs foodServed) fromJSON(data []byte) foodServed {
+func (fs FoodServed) FromJSON(data []byte) FoodServed {
 	var err error
 	err = json.Unmarshal(data, &fs)
 	if err != nil {
@@ -149,8 +149,8 @@ func (fs foodServed) fromJSON(data []byte) foodServed {
 	return fs
 }
 
-func newFoodServed(id uuid.UUID, items []OrderedItem) foodServed {
-	return foodServed{
+func NewFoodServed(id uuid.UUID, items []OrderedItem) FoodServed {
+	return FoodServed{
 		ID:    id,
 		Items: items,
 	}
@@ -158,14 +158,14 @@ func newFoodServed(id uuid.UUID, items []OrderedItem) foodServed {
 
 // --
 
-type tabClosed struct {
+type TabClosed struct {
 	ID         uuid.UUID
 	AmountPaid float64
 	OrderValue float64
 	TipValue   float64
 }
 
-func (tc tabClosed) fromJSON(data []byte) tabClosed {
+func (tc TabClosed) FromJSON(data []byte) TabClosed {
 	var err error
 	err = json.Unmarshal(data, &tc)
 	if err != nil {
@@ -174,8 +174,8 @@ func (tc tabClosed) fromJSON(data []byte) tabClosed {
 	return tc
 }
 
-func newTabClosed(id uuid.UUID, amountPaid, orderValue, tipValue float64) tabClosed {
-	return tabClosed{
+func NewTabClosed(id uuid.UUID, amountPaid, orderValue, tipValue float64) TabClosed {
+	return TabClosed{
 		ID:         id,
 		AmountPaid: amountPaid,
 		OrderValue: orderValue,
@@ -185,12 +185,12 @@ func newTabClosed(id uuid.UUID, amountPaid, orderValue, tipValue float64) tabClo
 
 // --
 
-type exception struct {
+type Exception struct {
 	Type    string
 	Message string
 }
 
-func (e exception) fromJSON(data []byte) exception {
+func (e Exception) FromJSON(data []byte) Exception {
 	var err error
 	err = json.Unmarshal(data, &e)
 	if err != nil {
@@ -199,14 +199,14 @@ func (e exception) fromJSON(data []byte) exception {
 	return e
 }
 
-func newException(t string, msg string) exception {
-	return exception{Type: t, Message: msg}
+func NewException(t string, msg string) Exception {
+	return Exception{Type: t, Message: msg}
 }
 
-func (c exception) Error() string {
+func (c Exception) Error() string {
 	return c.Type + ":" + c.Message
 }
 
-var TabNotOpenException = newException("TabNotOpen", "Cannot Place order without open Tab")
-var DrinksNotOutstanding = newException("DrinksNotOutstanding", "Cannot serve unordered drinks")
-var FoodsNotOutstanding = newException("FoodsNotOutstanding", "Cannot prepare unordered food")
+var TabNotOpenException = NewException("TabNotOpen", "Cannot Place order without open Tab")
+var DrinksNotOutstanding = NewException("DrinksNotOutstanding", "Cannot serve unordered drinks")
+var FoodsNotOutstanding = NewException("FoodsNotOutstanding", "Cannot prepare unordered food")

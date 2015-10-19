@@ -27,15 +27,20 @@ func init() {
 	s = serializer.NewSerializer()
 }
 
+func Init() {
+	Tabs = NewTabs()
+	InitConsumers()
+}
+
 func InitConsumers() {
-	NewConsumer(openTabTopic, openTabTopic+"Consumer", OpenTabHandler)
-	NewConsumer(placeOrderTopic, placeOrderTopic+"Consumer", PlaceOrderHandler)
-	NewConsumer(markDrinksServedTopic, markDrinksServedTopic+"Consumer", MarkDrinksServedHandler)
-	NewConsumer(markFoodPreparedTopic, markFoodPreparedTopic+"Consumer", MarkFoodPreparedHandler)
-	NewConsumer(markFoodServedTopic, markFoodServedTopic+"Consumer", MarkFoodServedHandler)
-	NewConsumer(foodServedTopic, foodServedTopic+"Consumer", FoodServedHandler)
-	NewConsumer(drinksServedTopic, drinksServedTopic+"Consumer", DrinksServedHandler)
-	NewConsumer(closeTabTopic, closeTabTopic+"Consumer", CloseTabHandler)
+	NewConsumer(OpenTabTopic, OpenTabTopic+"Consumer", OpenTabHandler)
+	NewConsumer(PlaceOrderTopic, PlaceOrderTopic+"Consumer", PlaceOrderHandler)
+	NewConsumer(MarkDrinksServedTopic, MarkDrinksServedTopic+"Consumer", MarkDrinksServedHandler)
+	NewConsumer(MarkFoodPreparedTopic, MarkFoodPreparedTopic+"Consumer", MarkFoodPreparedHandler)
+	NewConsumer(MarkFoodServedTopic, MarkFoodServedTopic+"Consumer", MarkFoodServedHandler)
+	NewConsumer(FoodServedTopic, FoodServedTopic+"Consumer", FoodServedHandler)
+	NewConsumer(DrinksServedTopic, DrinksServedTopic+"Consumer", DrinksServedHandler)
+	NewConsumer(CloseTabTopic, CloseTabTopic+"Consumer", CloseTabHandler)
 }
 
 func SetNsqdTCPAddr(address string) {
@@ -44,6 +49,10 @@ func SetNsqdTCPAddr(address string) {
 
 func SetLookupdHTTPAddrs(addresses app.StringArray) {
 	lookupdHTTPAddrs = addresses
+}
+
+func SetConnectToNSQD(v bool) {
+	connectToNSQD = v
 }
 
 func NewConsumer(topic, channel string, handler func(*nsq.Message) error) *nsq.Consumer {

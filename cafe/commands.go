@@ -8,29 +8,29 @@ import (
 )
 
 const (
-	openTabTopic          = "OpenTab"
-	placeOrderTopic       = "PlaceOrder"
-	markDrinksServedTopic = "MarkDrinksServed"
-	markFoodPreparedTopic = "MarkFoodPrepared"
-	markFoodServedTopic   = "MarkFoodServed"
-	closeTabTopic         = "CloseTab"
+	OpenTabTopic          = "OpenTab"
+	PlaceOrderTopic       = "PlaceOrder"
+	MarkDrinksServedTopic = "MarkDrinksServed"
+	MarkFoodPreparedTopic = "MarkFoodPrepared"
+	MarkFoodServedTopic   = "MarkFoodServed"
+	CloseTabTopic         = "CloseTab"
 )
 
-type openTab struct {
+type OpenTab struct {
 	ID          uuid.UUID
 	TableNumber int
 	WaitStaff   string
 }
 
-func newOpenTab(tableNumber int, waiter string) openTab {
-	return openTab{
+func NewOpenTab(tableNumber int, waiter string) OpenTab {
+	return OpenTab{
 		ID:          uuid.NewRandom(),
 		TableNumber: tableNumber,
 		WaitStaff:   waiter,
 	}
 }
 
-func (o openTab) fromJSON(data []byte) openTab {
+func (o OpenTab) FromJSON(data []byte) OpenTab {
 	var err error
 	err = json.Unmarshal(data, &o)
 	if err != nil {
@@ -41,12 +41,12 @@ func (o openTab) fromJSON(data []byte) openTab {
 
 // --
 
-type placeOrder struct {
+type PlaceOrder struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (po placeOrder) fromJSON(data []byte) placeOrder {
+func (po PlaceOrder) FromJSON(data []byte) PlaceOrder {
 	var err error
 	err = json.Unmarshal(data, &po)
 	if err != nil {
@@ -55,8 +55,8 @@ func (po placeOrder) fromJSON(data []byte) placeOrder {
 	return po
 }
 
-func newPlaceOrder(id uuid.UUID, items []OrderedItem) placeOrder {
-	return placeOrder{
+func NewPlaceOrder(id uuid.UUID, items []OrderedItem) PlaceOrder {
+	return PlaceOrder{
 		ID:    id,
 		Items: items,
 	}
@@ -87,12 +87,12 @@ func newMarkDrinksServed(id uuid.UUID, items []OrderedItem) markDrinksServed {
 
 // --
 
-type markFoodPrepared struct {
+type MarkFoodPrepared struct {
 	ID    uuid.UUID
 	Items []OrderedItem
 }
 
-func (mfp markFoodPrepared) fromJSON(data []byte) markFoodPrepared {
+func (mfp MarkFoodPrepared) FromJSON(data []byte) MarkFoodPrepared {
 	var err error
 	err = json.Unmarshal(data, &mfp)
 	if err != nil {
@@ -101,8 +101,8 @@ func (mfp markFoodPrepared) fromJSON(data []byte) markFoodPrepared {
 	return mfp
 }
 
-func newMarkFoodPrepared(id uuid.UUID, items []OrderedItem) markFoodPrepared {
-	return markFoodPrepared{
+func NewMarkFoodPrepared(id uuid.UUID, items []OrderedItem) MarkFoodPrepared {
+	return MarkFoodPrepared{
 		ID:    id,
 		Items: items,
 	}

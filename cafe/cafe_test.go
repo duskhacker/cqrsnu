@@ -17,7 +17,7 @@ var testConsumers []*nsq.Consumer
 var _ = Describe("Main", func() {
 
 	var (
-		openTabCmd openTab
+		openTabCmd OpenTab
 		tabID      uuid.UUID
 		drinks     []OrderedItem
 		food       []OrderedItem
@@ -25,7 +25,7 @@ var _ = Describe("Main", func() {
 
 	BeforeEach(func() {
 		Tabs = NewTabs()
-		openTabCmd = newOpenTab(1, "Kinessa")
+		openTabCmd = NewOpenTab(1, "Kinessa")
 		tabID = openTabCmd.ID
 
 		drinks = []OrderedItem{}
@@ -45,15 +45,15 @@ var _ = Describe("Main", func() {
 		It("opens a tab", func() {
 			done := make(chan bool)
 
-			newTestConsumer(tabOpenedTopic, tabOpenedTopic+"TestConsumer",
+			newTestConsumer(TabOpenedTopic, TabOpenedTopic+"TestConsumer",
 				func(m *nsq.Message) error {
 					defer GinkgoRecover()
-					Expect(new(tabOpened).fromJSON(m.Body)).To(Equal(newTabOpened(tabID, 1, "Kinessa")))
+					Expect(new(TabOpened).FromJSON(m.Body)).To(Equal(NewTabOpened(tabID, 1, "Kinessa")))
 					done <- true
 					return nil
 				})
 
-			Send(openTabTopic, openTabCmd)
+			Send(OpenTabTopic, openTabCmd)
 
 			Eventually(done).Should(Receive(BeTrue()), "No TabOpened received")
 		})
@@ -63,17 +63,17 @@ var _ = Describe("Main", func() {
 		Describe("with no tab opened", func() {
 			It("receives error", func() {
 				done := make(chan bool)
-				command := newPlaceOrder(nil, nil)
+				command := NewPlaceOrder(nil, nil)
 
-				newTestConsumer(exceptionTopic, exceptionTopic+"TestConsumer",
+				newTestConsumer(ExceptionTopic, ExceptionTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						Expect(new(exception).fromJSON(m.Body)).To(Equal(TabNotOpenException))
+						Expect(new(Exception).FromJSON(m.Body)).To(Equal(TabNotOpenException))
 						done <- true
 						return nil
 					})
 
-				Send(placeOrderTopic, command)
+				Send(PlaceOrderTopic, command)
 
 				Eventually(done).Should(Receive(BeTrue()), "TabNotOpenException Exception not Raised")
 			})
@@ -87,50 +87,50 @@ var _ = Describe("Main", func() {
 
 			BeforeEach(func() {
 
-				newTestConsumer(drinksOrderedTopic, drinksOrderedTopic+"TestConsumer",
+				newTestConsumer(DrinksOrderedTopic, DrinksOrderedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
-						order := new(drinksOrdered).fromJSON(m.Body)
+						order := new(DrinksOrdered).FromJSON(m.Body)
 						if len(order.Items) > 0 {
 							drinksOrderedDone <- true
 						}
 						return nil
 					})
 
-				newTestConsumer(foodOrderedTopic, foodOrderedTopic+"TestConsumer",
+				newTestConsumer(FoodOrderedTopic, FoodOrderedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
-						order := new(foodOrdered).fromJSON(m.Body)
+						order := new(FoodOrdered).FromJSON(m.Body)
 						if len(order.Items) > 0 {
 							foodOrderedDone <- true
 						}
 						return nil
 					})
 
-				newTestConsumer(exceptionTopic, exceptionTopic+"TestConsumer",
+				newTestConsumer(ExceptionTopic, ExceptionTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						ex := new(exception).fromJSON(m.Body)
+						ex := new(Exception).FromJSON(m.Body)
 						Expect(ex).To(BeNil())
 						return nil
 					})
 
-				Send(openTabTopic, openTabCmd)
+				Send(OpenTabTopic, openTabCmd)
 			})
 
 			It("drinks", func() {
 
-				Send(placeOrderTopic, newPlaceOrder(tabID, drinks))
+				Send(PlaceOrderTopic, NewPlaceOrder(tabID, drinks))
 
 				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "DrinksOrdered not received")
 			})
 
 			It("food", func() {
-				Send(placeOrderTopic, newPlaceOrder(tabID, food))
+				Send(PlaceOrderTopic, NewPlaceOrder(tabID, food))
 
 				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
 			})
 
 			It("food and drink", func() {
-				Send(placeOrderTopic, newPlaceOrder(tabID, append(food, drinks...)))
+				Send(PlaceOrderTopic, NewPlaceOrder(tabID, append(food, drinks...)))
 
 				Eventually(foodOrderedDone).Should(Receive(BeTrue()), "FoodOrdered not received")
 				Eventually(drinksOrderedDone).Should(Receive(BeTrue()), "DrinksOrdered not received")
@@ -140,26 +140,26 @@ var _ = Describe("Main", func() {
 
 	Describe("Serving Drinks", func() {
 		BeforeEach(func() {
-			Send(openTabTopic, openTabCmd)
+			Send(OpenTabTopic, openTabCmd)
 		})
 
 		Describe("with 1 drink ordered", func() {
 			BeforeEach(func() {
-				Send(placeOrderTopic, newPlaceOrder(tabID, drinks[:1]))
+				Send(PlaceOrderTopic, NewPlaceOrder(tabID, drinks[:1]))
 			})
 
 			It("generates exception if second drink is marked served", func() {
 				done := make(chan bool)
 
-				newTestConsumer(exceptionTopic, exceptionTopic+"TestConsumer", func(m *nsq.Message) error {
-					ex := new(exception).fromJSON(m.Body)
+				newTestConsumer(ExceptionTopic, ExceptionTopic+"TestConsumer", func(m *nsq.Message) error {
+					ex := new(Exception).FromJSON(m.Body)
 					defer GinkgoRecover()
 					Expect(ex).To(Equal(DrinksNotOutstanding))
 					done <- true
 					return nil
 				})
 
-				Send(markDrinksServedTopic, newMarkDrinksServed(tabID, drinks[1:2]))
+				Send(MarkDrinksServedTopic, newMarkDrinksServed(tabID, drinks[1:2]))
 
 				Eventually(done).Should(Receive(BeTrue()), "DrinksNotOutstanding Exception not Raised")
 			})
@@ -173,47 +173,47 @@ var _ = Describe("Main", func() {
 			BeforeEach(func() {
 				drinksServedDone = make(chan bool)
 
-				Send(placeOrderTopic, newPlaceOrder(tabID, drinks))
+				Send(PlaceOrderTopic, NewPlaceOrder(tabID, drinks))
 			})
 
 			It("marks drinks served", func() {
 
-				newTestConsumer(drinksServedTopic, drinksServedTopic+"TestConsumer",
+				newTestConsumer(DrinksServedTopic, DrinksServedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						evt := new(drinksServed).fromJSON(m.Body)
+						evt := new(DrinksServed).FromJSON(m.Body)
 						Expect(evt.Items).To(Equal(drinks))
 						drinksServedDone <- true
 						return nil
 					})
 
-				Send(markDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
+				Send(MarkDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
 				Eventually(drinksServedDone).Should(Receive(BeTrue()), "DrinksServed not received")
 			})
 
 			It("does not allow drinks to be served twice", func() {
 				rcvdException := make(chan bool)
-				newTestConsumer(exceptionTopic, exceptionTopic+"TestExceptionConsumer",
+				newTestConsumer(ExceptionTopic, ExceptionTopic+"TestExceptionConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						ex := new(exception).fromJSON(m.Body)
+						ex := new(Exception).FromJSON(m.Body)
 						Expect(ex).To(Equal(DrinksNotOutstanding))
 						rcvdException <- true
 						return nil
 					})
 
-				newTestConsumer(drinksServedTopic, drinksServedTopic+"TestConsumer", func(m *nsq.Message) error {
+				newTestConsumer(DrinksServedTopic, DrinksServedTopic+"TestConsumer", func(m *nsq.Message) error {
 					defer GinkgoRecover()
-					evt := new(drinksServed).fromJSON(m.Body)
+					evt := new(DrinksServed).FromJSON(m.Body)
 					Expect(evt.Items).To(Equal(drinks))
 					drinksServedDone <- true
 					return nil
 				})
 
-				Send(markDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
+				Send(MarkDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
 				Eventually(drinksServedDone).Should(Receive(BeTrue()), "DrinksServed not received")
 
-				Send(markDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
+				Send(MarkDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
 				Eventually(rcvdException).Should(Receive(BeTrue()), "DrinksNotOutstanding exception not received")
 			})
 		})
@@ -223,23 +223,23 @@ var _ = Describe("Main", func() {
 	Describe("Food", func() {
 
 		BeforeEach(func() {
-			Send(openTabTopic, openTabCmd)
-			Send(placeOrderTopic, newPlaceOrder(tabID, food))
+			Send(OpenTabTopic, openTabCmd)
+			Send(PlaceOrderTopic, NewPlaceOrder(tabID, food))
 		})
 
 		Describe("prepare", func() {
 			It("marks food prepared", func() {
 				rcvdFoodPrepared := make(chan bool)
-				newTestConsumer(foodPreparedTopic, foodPreparedTopic+"TestConsumer",
+				newTestConsumer(FoodPreparedTopic, FoodPreparedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						evt := new(foodPrepared).fromJSON(m.Body)
+						evt := new(FoodPrepared).FromJSON(m.Body)
 						Expect(evt.Items).To(Equal(food))
 						rcvdFoodPrepared <- true
 						return nil
 					})
 
-				Send(markFoodPreparedTopic, newMarkFoodPrepared(tabID, food))
+				Send(MarkFoodPreparedTopic, NewMarkFoodPrepared(tabID, food))
 				Eventually(rcvdFoodPrepared).Should(Receive(BeTrue()), "FoodPrepared not received")
 			})
 		})
@@ -247,13 +247,13 @@ var _ = Describe("Main", func() {
 		Describe("serve", func() {
 			BeforeEach(func() {
 				rcvdFoodPrepared := make(chan bool)
-				newTestConsumer(foodPreparedTopic, foodPreparedTopic+"TestConsumer",
+				newTestConsumer(FoodPreparedTopic, FoodPreparedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						rcvdFoodPrepared <- true
 						return nil
 					})
 
-				Send(markFoodPreparedTopic, newMarkFoodPrepared(tabID, food))
+				Send(MarkFoodPreparedTopic, NewMarkFoodPrepared(tabID, food))
 				Eventually(rcvdFoodPrepared).Should(Receive(BeTrue()), "FoodPrepared not received")
 
 			})
@@ -261,16 +261,16 @@ var _ = Describe("Main", func() {
 			It("marks food served", func() {
 				listenForUnexpectedException()
 				rcvdFoodServed := make(chan bool)
-				newTestConsumer(foodServedTopic, foodServedTopic+"TestConsumer",
+				newTestConsumer(FoodServedTopic, FoodServedTopic+"TestConsumer",
 					func(m *nsq.Message) error {
 						defer GinkgoRecover()
-						evt := new(foodServed).fromJSON(m.Body)
+						evt := new(FoodServed).FromJSON(m.Body)
 						Expect(evt.Items).To(Equal(food))
 						rcvdFoodServed <- true
 						return nil
 					})
 
-				Send(markFoodServedTopic, newMarkFoodServed(tabID, food))
+				Send(MarkFoodServedTopic, newMarkFoodServed(tabID, food))
 				Eventually(rcvdFoodServed).Should(Receive(BeTrue()), "FoodServed not received")
 			})
 		})
@@ -278,14 +278,14 @@ var _ = Describe("Main", func() {
 
 	Describe("Closing Tab", func() {
 		BeforeEach(func() {
-			Send(openTabTopic, openTabCmd)
-			Send(placeOrderTopic, newPlaceOrder(tabID, append(food, drinks...)))
-			Send(markDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
-			Send(markFoodPreparedTopic, newMarkFoodPrepared(tabID, food))
-			Send(markFoodServedTopic, newMarkFoodServed(tabID, food))
+			Send(OpenTabTopic, openTabCmd)
+			Send(PlaceOrderTopic, NewPlaceOrder(tabID, append(food, drinks...)))
+			Send(MarkDrinksServedTopic, newMarkDrinksServed(tabID, drinks))
+			Send(MarkFoodPreparedTopic, NewMarkFoodPrepared(tabID, food))
+			Send(MarkFoodServedTopic, newMarkFoodServed(tabID, food))
 
 			rcvdDrinksServed := make(chan bool)
-			newTestConsumer(drinksServedTopic, drinksServedTopic+"TestConsumer",
+			newTestConsumer(DrinksServedTopic, DrinksServedTopic+"TestConsumer",
 				func(msg *nsq.Message) error {
 					rcvdDrinksServed <- true
 					return nil
@@ -297,9 +297,9 @@ var _ = Describe("Main", func() {
 		Describe("with tip", func() {
 			It("closes tab", func() {
 				tabClosedReceived := make(chan bool)
-				newTestConsumer(tabClosedTopic, tabClosedTopic+"TestConsumer",
+				newTestConsumer(TabClosedTopic, TabClosedTopic+"TestConsumer",
 					func(msg *nsq.Message) error {
-						evt := new(tabClosed).fromJSON(msg.Body)
+						evt := new(TabClosed).FromJSON(msg.Body)
 						defer GinkgoRecover()
 						Expect(evt.AmountPaid).To(Equal(31.50 + 0.50))
 						Expect(evt.OrderValue).To(Equal(31.50))
@@ -308,7 +308,7 @@ var _ = Describe("Main", func() {
 						return nil
 					})
 
-				Send(closeTabTopic, newCloseTab(tabID, 31.50+0.50))
+				Send(CloseTabTopic, newCloseTab(tabID, 31.50+0.50))
 
 				Eventually(tabClosedReceived).Should(Receive(BeTrue()), "TabClosed not received")
 			})
@@ -328,8 +328,8 @@ func stopAllTestConsumers() {
 
 func listenForUnexpectedException() {
 	f := func(m *nsq.Message) error {
-		pf("EXCEPTION: %#v\n", new(exception).fromJSON(m.Body))
+		pf("EXCEPTION: %#v\n", new(Exception).FromJSON(m.Body))
 		return nil
 	}
-	newTestConsumer(exceptionTopic, exceptionTopic+"UnexpectedExceptionConsumer", f)
+	newTestConsumer(ExceptionTopic, ExceptionTopic+"UnexpectedExceptionConsumer", f)
 }

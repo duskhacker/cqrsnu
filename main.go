@@ -12,7 +12,7 @@ const (
 func main() {
 	cafe.SetLookupdHTTPAddrs = app.StringArray{}
 	//	NsqConfig.MaxInFlight = maxConcurrentHttpRequests
-	cafe.InitConsumers()
+	cafe.Init()
 	// stopchan and all that
 	cafe.StopAllConsumers()
 }
