@@ -1,4 +1,4 @@
-package main
+package cafe
 
 import (
 	"log"
@@ -15,7 +15,7 @@ import (
 
 var (
 	serverSession *gexec.Session
-	suite         = "main"
+	suite         = "cafe"
 )
 
 func TestMainSuite(t *testing.T) {
@@ -52,6 +52,7 @@ var _ = BeforeSuite(func() {
 	Eventually(serverSession.Err, "2s").Should(gbytes.Say(`TCP: listening on`))
 
 	connectToNSQD = true
+	SetNsqdTCPAddr("localhost:4150")
 	InitConsumers()
 })
 
