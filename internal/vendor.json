@@ -1,0 +1,305 @@
+{
+	"Tool": "github.com/kardianos/vendor",
+	"Package": [
+		{
+			"Vendor": "code.google.com/p/go-uuid/uuid",
+			"Local": "github.com/duskhacker/cqrsnu/internal/code.google.com/p/go-uuid/uuid",
+			"Version": "35bc42037350",
+			"VersionTime": "2014-12-02T10:54:02-06:00"
+		},
+		{
+			"Vendor": "github.com/bitly/go-nsq",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/bitly/go-nsq",
+			"Version": "8c8eba2ac6823ce1ba17b3a353eaf5811a21a7f5",
+			"VersionTime": "2015-05-03T14:51:45-04:00"
+		},
+		{
+			"Vendor": "github.com/bitly/nsq/internal/app",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/bitly/nsq/internal/app",
+			"Version": "668a8af6e38d30e67a9c8c26a027b246ff7db39b",
+			"VersionTime": "2015-05-03T14:59:32-04:00"
+		},
+		{
+			"Vendor": "github.com/gin-gonic/gin",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/gin-gonic/gin",
+			"Version": "54a86280f96dbf8a72859d5eb5bb13347c7507d6",
+			"VersionTime": "2015-05-26T17:49:25+02:00"
+		},
+		{
+			"Vendor": "github.com/gin-gonic/gin/binding",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/gin-gonic/gin/binding",
+			"Version": "54a86280f96dbf8a72859d5eb5bb13347c7507d6",
+			"VersionTime": "2015-05-26T17:49:25+02:00"
+		},
+		{
+			"Vendor": "github.com/gin-gonic/gin/render",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/gin-gonic/gin/render",
+			"Version": "54a86280f96dbf8a72859d5eb5bb13347c7507d6",
+			"VersionTime": "2015-05-26T17:49:25+02:00"
+		},
+		{
+			"Vendor": "github.com/golang/protobuf/proto",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/golang/protobuf/proto",
+			"Version": "9ebc6c4ed925b1323a0b11cea09e527cdc4e557c",
+			"VersionTime": "2015-10-20T08:33:00+11:00"
+		},
+		{
+			"Vendor": "github.com/golang/protobuf/proto/proto3_proto",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/golang/protobuf/proto/proto3_proto",
+			"Version": "9ebc6c4ed925b1323a0b11cea09e527cdc4e557c",
+			"VersionTime": "2015-10-20T08:33:00+11:00"
+		},
+		{
+			"Vendor": "github.com/golang/protobuf/proto/testdata",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/golang/protobuf/proto/testdata",
+			"Version": "9ebc6c4ed925b1323a0b11cea09e527cdc4e557c",
+			"VersionTime": "2015-10-20T08:33:00+11:00"
+		},
+		{
+			"Vendor": "github.com/manucorporat/sse",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/manucorporat/sse",
+			"Version": "b7eeebd8987e6b233e43db2551d43f71b2e115d5",
+			"VersionTime": "2015-05-22T19:23:40+02:00"
+		},
+		{
+			"Vendor": "github.com/mattn/go-colorable",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/mattn/go-colorable",
+			"Version": "d67e0b7d1797975196499f79bcc322c08b9f218b",
+			"VersionTime": "2015-03-27T10:04:15+09:00"
+		},
+		{
+			"Vendor": "github.com/mattn/go-isatty",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/mattn/go-isatty",
+			"Version": "ae0b1f8f8004be68d791a576e3d8e7648ab41449",
+			"VersionTime": "2015-04-09T09:42:43+09:00"
+		},
+		{
+			"Vendor": "github.com/mreiferson/go-snappystream",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/mreiferson/go-snappystream",
+			"Version": "028eae7ab5c4c9e2d1cb4c4ca1e53259bbe7e504",
+			"VersionTime": "2015-04-16T16:44:20-07:00"
+		},
+		{
+			"Vendor": "github.com/mreiferson/go-snappystream/snappy-go",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/mreiferson/go-snappystream/snappy-go",
+			"Version": "028eae7ab5c4c9e2d1cb4c4ca1e53259bbe7e504",
+			"VersionTime": "2015-04-16T16:44:20-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/config",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/config",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/codelocation",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/codelocation",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/containernode",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/containernode",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/failer",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/failer",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/leafnodes",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/leafnodes",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/remote",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/remote",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/spec",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/spec",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/specrunner",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/specrunner",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/suite",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/suite",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/testingtproxy",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/testingtproxy",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/internal/writer",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/internal/writer",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/reporters",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/reporters",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/reporters/stenographer",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/reporters/stenographer",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/ginkgo/types",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo/types",
+			"Version": "1b59c57df76ede42c08590546916e6a18685857d",
+			"VersionTime": "2015-09-01T17:08:16-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/format",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/format",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/gbytes",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/gbytes",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/gexec",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/gexec",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/ghttp",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/ghttp",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/ghttp/protobuf",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/ghttp/protobuf",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/internal/assertion",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/internal/assertion",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/internal/asyncassertion",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/internal/asyncassertion",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/internal/fakematcher",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/internal/fakematcher",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/internal/oraclematcher",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/internal/oraclematcher",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/internal/testingtsupport",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/internal/testingtsupport",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/matchers",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/matchers",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/matchers/support/goraph/bipartitegraph",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/matchers/support/goraph/bipartitegraph",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/matchers/support/goraph/edge",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/matchers/support/goraph/edge",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/matchers/support/goraph/node",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/matchers/support/goraph/node",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/matchers/support/goraph/util",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/matchers/support/goraph/util",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/onsi/gomega/types",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/types",
+			"Version": "2152b45fa28a361beba9aab0885972323a444e28",
+			"VersionTime": "2015-10-06T20:56:56-07:00"
+		},
+		{
+			"Vendor": "github.com/stretchr/testify/assert",
+			"Local": "github.com/duskhacker/cqrsnu/internal/github.com/stretchr/testify/assert",
+			"Version": "3c81d9b268122b3a8fa245f907518d716f503d2c",
+			"VersionTime": "2015-06-02T23:16:36+01:00"
+		},
+		{
+			"Vendor": "golang.org/x/net/context",
+			"Local": "github.com/duskhacker/cqrsnu/internal/golang.org/x/net/context",
+			"Version": "621fff363a1d9ad7fdd0bfa9d80a42881267deb4",
+			"VersionTime": "2015-05-14T17:00:25+09:00"
+		},
+		{
+			"Vendor": "gopkg.in/bluesuncorp/validator.v5",
+			"Local": "github.com/duskhacker/cqrsnu/internal/gopkg.in/bluesuncorp/validator.v5",
+			"Version": "07cbdd2e6dfd947b002e83c13b775c7580fab2d5",
+			"VersionTime": "2015-05-22T22:33:24-04:00"
+		},
+		{
+			"Vendor": "gopkg.in/check.v1",
+			"Local": "github.com/duskhacker/cqrsnu/internal/gopkg.in/check.v1",
+			"Version": "64131543e7896d5bcc6bd5a76287eb75ea96c673",
+			"VersionTime": "2014-10-24T11:38:53-02:00"
+		}
+	]
+}

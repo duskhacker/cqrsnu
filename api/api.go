@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/duskhacker/cqrsnu/cafe"
+	"github.com/duskhacker/cqrsnu/internal/code.google.com/p/go-uuid/uuid"
+	"github.com/duskhacker/cqrsnu/internal/github.com/gin-gonic/gin"
 	"github.com/duskhacker/cqrsnu/read_models/chef_todos"
-	"github.com/gin-gonic/gin"
 )
 
 // Test Data

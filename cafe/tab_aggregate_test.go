@@ -1,8 +1,8 @@
 package cafe
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega"
 )
 
 var _ = Describe("TabAggegate", func() {

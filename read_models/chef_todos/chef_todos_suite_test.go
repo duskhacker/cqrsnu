@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/duskhacker/cqrsnu/cafe"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega"
 
-	"github.com/onsi/gomega/gbytes"
-	"github.com/onsi/gomega/gexec"
+	"github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/gbytes"
+	"github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega/gexec"
 )
 
 var (

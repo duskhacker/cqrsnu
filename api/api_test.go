@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/duskhacker/cqrsnu/internal/code.google.com/p/go-uuid/uuid"
 
-	"github.com/gin-gonic/gin"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/duskhacker/cqrsnu/internal/github.com/gin-gonic/gin"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega"
 )
 
 var pf = fmt.Printf

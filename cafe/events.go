@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/duskhacker/cqrsnu/internal/code.google.com/p/go-uuid/uuid"
 )
 
 const (

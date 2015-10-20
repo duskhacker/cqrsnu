@@ -3,11 +3,11 @@ package cheftodos
 import (
 	"fmt"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/duskhacker/cqrsnu/internal/code.google.com/p/go-uuid/uuid"
 
-	"github.com/bitly/go-nsq"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/duskhacker/cqrsnu/internal/github.com/bitly/go-nsq"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/ginkgo"
+	. "github.com/duskhacker/cqrsnu/internal/github.com/onsi/gomega"
 
 	"github.com/duskhacker/cqrsnu/cafe"
 )

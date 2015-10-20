@@ -4,8 +4,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/bitly/go-nsq"
-	"github.com/bitly/nsq/internal/app"
+	"github.com/duskhacker/cqrsnu/internal/github.com/bitly/go-nsq"
+	"github.com/duskhacker/cqrsnu/internal/github.com/bitly/nsq/internal/app"
 	"github.com/duskhacker/cqrsnu/serializer"
 )
 
