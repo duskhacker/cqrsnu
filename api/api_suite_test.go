@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/duskhacker/cqrsnu/cafe"
+	"github.com/duskhacker/cqrsnu/read_models/chef_todos"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/duskhacker/cqrsnu/read_models/chef_todos"
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 )
@@ -56,7 +56,7 @@ var _ = BeforeSuite(func() {
 	cafe.SetConnectToNSQD(true)
 	cafe.SetNsqdTCPAddr("localhost:4150")
 	cafe.Init()
-	chef_todos.Init()
+	cheftodos.Init()
 })
 
 var _ = AfterSuite(func() {

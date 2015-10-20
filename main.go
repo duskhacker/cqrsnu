@@ -9,7 +9,6 @@ import (
 	"github.com/bitly/nsq/internal/app"
 	"github.com/duskhacker/cqrsnu/api"
 	"github.com/duskhacker/cqrsnu/cafe"
-	"github.com/duskhacker/cqrsnu/read_models/chef_todos"
 )
 
 func main() {

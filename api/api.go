@@ -84,7 +84,7 @@ type ChefTodoListResponse struct {
 func ChefTodoList(c *gin.Context) {
 	r := ChefTodoListResponse{}
 
-	for _, todoList := range chef_todos.ChefTodoList {
+	for _, todoList := range cheftodos.ChefTodoList {
 		t := Tab{TabID: todoList.TabID.String()}
 		for _, item := range todoList.Items {
 			t.Items = append(t.Items, Item{MenuNumber: item.MenuNumber, Description: item.Description})

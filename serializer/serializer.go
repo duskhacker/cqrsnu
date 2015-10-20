@@ -11,7 +11,7 @@ type Serializer interface {
 
 type SerializerFunc func(interface{}) []byte
 
-// HandleMessage implements the Handler interface
+// Serialize implements the Handler interface
 func (s SerializerFunc) Serialize(o interface{}) []byte {
 	return s(o)
 }

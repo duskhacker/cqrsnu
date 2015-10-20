@@ -203,8 +203,8 @@ func NewException(t string, msg string) Exception {
 	return Exception{Type: t, Message: msg}
 }
 
-func (c Exception) Error() string {
-	return c.Type + ":" + c.Message
+func (e Exception) Error() string {
+	return e.Type + ":" + e.Message
 }
 
 var TabNotOpenException = NewException("TabNotOpen", "Cannot Place order without open Tab")
