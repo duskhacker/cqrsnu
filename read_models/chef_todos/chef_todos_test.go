@@ -1,4 +1,4 @@
-package chef_todo_list
+package chef_todos
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ var pf = fmt.Printf
 
 var testConsumers []*nsq.Consumer
 
-var _ = Describe("Chef TODO List", func() {
+var _ = Describe("Chef TODOs", func() {
 
 	var (
 		openTabCmd cafe.OpenTab
@@ -26,7 +26,6 @@ var _ = Describe("Chef TODO List", func() {
 	)
 
 	BeforeEach(func() {
-		chefTodoList = []*todoListGroup{}
 		openTabCmd = cafe.NewOpenTab(1, "Kinessa")
 		tabID = openTabCmd.ID
 
@@ -40,8 +39,6 @@ var _ = Describe("Chef TODO List", func() {
 	})
 
 	AfterEach(func() {
-		cafe.StopAllConsumers()
-		StopAllConsumers()
 		stopAllTestConsumers()
 	})
 
@@ -49,7 +46,7 @@ var _ = Describe("Chef TODO List", func() {
 		BeforeEach(func() {
 			cafe.Send(cafe.OpenTabTopic, openTabCmd)
 			cafe.Send(cafe.PlaceOrderTopic, cafe.NewPlaceOrder(tabID, append(food, drinks...)))
-			f := func() int { return len(chefTodoList) }
+			f := func() int { return len(ChefTodoList) }
 			Eventually(f).ShouldNot(BeZero())
 		})
 
@@ -60,9 +57,16 @@ var _ = Describe("Chef TODO List", func() {
 		Describe("with created group", func() {
 			It("Removes an item", func() {
 				cafe.Send(cafe.MarkFoodPreparedTopic, cafe.NewMarkFoodPrepared(tabID, food[0:1]))
-				f := func() int { return len(chefTodoList[0].Items) }
+				f := func() int {
+					group := getTodoListGroup(tabID)
+					if group == nil {
+						return 100
+					}
+					return len(group.Items)
+				}
+
 				Eventually(f).Should(Equal(1))
-				//				Expect(getTodoListGroup(tabID).Items).To(HaveLen(1))
+				Expect(getTodoListGroup(tabID).Items).To(HaveLen(1))
 			})
 		})
 	})

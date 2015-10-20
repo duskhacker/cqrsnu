@@ -1,4 +1,4 @@
-package chef_todo_list
+package chef_todos
 
 import (
 	"fmt"
@@ -12,13 +12,6 @@ var (
 	consumers []*nsq.Consumer
 )
 
-func InitConsumers() {
-	consumer := cafe.NewConsumer(cafe.FoodOrderedTopic, cafe.FoodOrderedTopic+"Todo", FoodOrderedHandler)
-	consumers = append(consumers, consumer)
-	consumer = cafe.NewConsumer(cafe.FoodPreparedTopic, cafe.FoodPreparedTopic+"Todo", FoodPreparedHandler)
-	consumers = append(consumers, consumer)
-}
-
 func FoodOrderedHandler(msg *nsq.Message) error {
 	evt := new(cafe.FoodOrdered).FromJSON(msg.Body)
 
@@ -27,12 +20,13 @@ func FoodOrderedHandler(msg *nsq.Message) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	chefTodoList = append(chefTodoList, group)
+	ChefTodoList = append(ChefTodoList, group)
 
 	return nil
 }
 
 func FoodPreparedHandler(msg *nsq.Message) error {
+	fmt.Printf("FoodPreparedHandler\n")
 	evt := new(cafe.FoodPrepared).FromJSON(msg.Body)
 
 	mutex.Lock()

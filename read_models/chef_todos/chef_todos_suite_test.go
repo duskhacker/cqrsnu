@@ -1,4 +1,4 @@
-package chef_todo_list
+package chef_todos
 
 import (
 	"log"
@@ -54,8 +54,10 @@ var _ = BeforeSuite(func() {
 
 	cafe.SetConnectToNSQD(true)
 	cafe.SetNsqdTCPAddr("localhost:4150")
+	ChefTodoList = []*todoListGroup{}
 	cafe.Init()
-	InitConsumers()
+	Init()
+
 })
 
 var _ = AfterSuite(func() {

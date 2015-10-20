@@ -1,11 +1,17 @@
-package chef_todo_list
+package chef_todos
 
 import (
+	"sync"
+
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/duskhacker/cqrsnu/cafe"
 )
 
-var chefTodoList = []*todoListGroup{}
+var (
+	mutex sync.RWMutex
+)
+
+var ChefTodoList []*todoListGroup
 
 type todoListItem struct {
 	MenuNumber  int
@@ -18,7 +24,7 @@ type todoListGroup struct {
 }
 
 func getTodoListGroup(tabID uuid.UUID) *todoListGroup {
-	for _, list := range chefTodoList {
+	for _, list := range ChefTodoList {
 		if list.TabID.String() == tabID.String() {
 			return list
 		}
@@ -32,4 +38,11 @@ func newTodoListGroup(tabID uuid.UUID, items []cafe.OrderedItem) *todoListGroup 
 		group.Items = append(group.Items, todoListItem{MenuNumber: item.MenuNumber, Description: item.Description})
 	}
 	return &group
+}
+
+func Init() {
+	consumer := cafe.NewConsumer(cafe.FoodPreparedTopic, cafe.FoodPreparedTopic+"ChefTodoList", FoodPreparedHandler)
+	consumers = append(consumers, consumer)
+	consumer = cafe.NewConsumer(cafe.FoodOrderedTopic, cafe.FoodOrderedTopic+"ChefTodoList", FoodOrderedHandler)
+	consumers = append(consumers, consumer)
 }
