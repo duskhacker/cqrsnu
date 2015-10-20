@@ -1,4 +1,4 @@
-package chef_todos
+package cheftodos
 
 import (
 	"log"
